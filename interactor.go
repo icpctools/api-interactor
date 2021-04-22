@@ -18,13 +18,14 @@ type (
 	ContestApi interface {
 		ContestsApi
 
-		ToContest(contestId string) (ContestApi, error)
-
 		Problems() ([]Problem, error)
 		ProblemById(problemId string) (Problem, error)
 
 		Submissions() ([]Submission, error)
 		SubmissionById(submissionId string) (Submission, error)
+
+		GetObject(interactor ApiType, id string) (ApiType, error)
+		GetObjects(interactor ApiType) ([]ApiType, error)
 	}
 
 	inter struct {

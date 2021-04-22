@@ -7,7 +7,7 @@ import (
 )
 
 func (i inter) Contests() ([]Contest, error) {
-	obj, err := i.GetObjects(new(Contest), "")
+	obj, err := i.GetObjects(new(Contest))
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve contests; %w", err)
 	}
@@ -43,7 +43,7 @@ func (i inter) ContestById(contestId string) (c Contest, err error) {
 }
 
 func (i inter) Problems() ([]Problem, error) {
-	obj, err := i.GetObjects(new(Problem), "")
+	obj, err := i.GetObjects(new(Problem))
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve problems; %w", err)
 	}
@@ -63,18 +63,14 @@ func (i inter) Problems() ([]Problem, error) {
 }
 
 func (i inter) ProblemById(problemId string) (p Problem, err error) {
-	obj, err := i.GetObjects(new(Problem), problemId)
+	obj, err := i.GetObject(new(Problem), problemId)
 	if err != nil {
 		return p, fmt.Errorf("could not retrieve problem; %w", err)
 	}
 
-	if len(obj) != 1 {
-		return p, fmt.Errorf("incorrect number of problems found, expected 1, got: %v", len(obj))
-	}
-
-	vv, ok := obj[0].(*Problem)
+	vv, ok := obj.(*Problem)
 	if !ok {
-		return p, fmt.Errorf("unexpected type found, expected problem, got: %T", obj[0])
+		return p, fmt.Errorf("unexpected type found, expected problem, got: %T", obj)
 	}
 
 	p = *vv
@@ -82,7 +78,7 @@ func (i inter) ProblemById(problemId string) (p Problem, err error) {
 }
 
 func (i inter) Submissions() ([]Submission, error) {
-	obj, err := i.GetObjects(new(Submission), "")
+	obj, err := i.GetObjects(new(Submission))
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve submissions; %w", err)
 	}
@@ -102,25 +98,39 @@ func (i inter) Submissions() ([]Submission, error) {
 }
 
 func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
-	obj, err := i.GetObjects(new(Submission), submissionId)
+	obj, err := i.GetObject(new(Submission), submissionId)
 	if err != nil {
 		return s, fmt.Errorf("could not retrieve submission; %w", err)
 	}
 
-	if len(obj) != 1 {
-		return s, fmt.Errorf("incorrect number of submissions found, expected 1, got: %v", len(obj))
-	}
-
-	vv, ok := obj[0].(*Submission)
+	vv, ok := obj.(*Submission)
 	if !ok {
-		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj[0])
+		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj)
 	}
 
 	s = *vv
 	return
 }
 
-func (i inter) GetObjects(interactor ApiType, id string) ([]ApiType, error) {
+func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
+	objs, err := i.retrieve(interactor, id)
+
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve problem; %w", err)
+	}
+
+	if len(objs) != 1 {
+		return nil, fmt.Errorf("incorrect number of objects found, expected 1, got: %v", len(objs))
+	}
+
+	return objs[0], nil
+}
+
+func (i inter) GetObjects(interactor ApiType) ([]ApiType, error) {
+	return i.retrieve(interactor, "")
+}
+
+func (i inter) retrieve(interactor ApiType, id string) ([]ApiType, error) {
 	resp, err := i.Get(i.baseUrl + interactor.Path(i.contestId, id))
 	if err != nil {
 		return nil, err
