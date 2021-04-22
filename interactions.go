@@ -1,26 +1,28 @@
 package interactor
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
 func (i inter) Contests() ([]Contest, error) {
-	obj, err := i.GetObjects(new(Contest))
+	obj, err := i.GetObjects(Contest{})
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve contests; %w", err)
 	}
 
-	// obj should be a slice of *Contest, cast to it to slice of Contest
+	// obj should be a slice of Contest, cast to it to slice of Contest
 	ret := make([]Contest, len(obj))
 	for k, v := range obj {
-		vv, ok := v.(*Contest)
+		vv, ok := v.(Contest)
 		if !ok {
 			return ret, fmt.Errorf("unexpected type found, expected contest, got: %T", v)
 		}
 
-		ret[k] = *vv
+		ret[k] = vv
 	}
 
 	return ret, nil
@@ -43,80 +45,99 @@ func (i inter) ContestById(contestId string) (c Contest, err error) {
 }
 
 func (i inter) Problems() ([]Problem, error) {
-	obj, err := i.GetObjects(new(Problem))
+	obj, err := i.GetObjects(Problem{})
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve problems; %w", err)
 	}
 
-	// obj should be a slice of *Contest, cast to it to slice of Contest
+	// obj should be a slice of Problem, cast to it to slice of Problem
 	ret := make([]Problem, len(obj))
 	for k, v := range obj {
-		vv, ok := v.(*Problem)
+		vv, ok := v.(Problem)
 		if !ok {
 			return ret, fmt.Errorf("unexpected type found, expected problem, got: %T", v)
 		}
 
-		ret[k] = *vv
+		ret[k] = vv
 	}
 
 	return ret, nil
 }
 
 func (i inter) ProblemById(problemId string) (p Problem, err error) {
-	obj, err := i.GetObject(new(Problem), problemId)
+	obj, err := i.GetObject(p, problemId)
 	if err != nil {
 		return p, fmt.Errorf("could not retrieve problem; %w", err)
 	}
 
-	vv, ok := obj.(*Problem)
+	vv, ok := obj.(Problem)
 	if !ok {
 		return p, fmt.Errorf("unexpected type found, expected problem, got: %T", obj)
 	}
 
-	p = *vv
+	p = vv
 	return
 }
 
 func (i inter) Submissions() ([]Submission, error) {
-	obj, err := i.GetObjects(new(Submission))
+	obj, err := i.GetObjects(Submission{})
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve submissions; %w", err)
 	}
 
-	// obj should be a slice of *Contest, cast to it to slice of Contest
+	// obj should be a slice of Submission, cast to it to slice of Submission
 	ret := make([]Submission, len(obj))
 	for k, v := range obj {
-		vv, ok := v.(*Submission)
+		vv, ok := v.(Submission)
 		if !ok {
 			return ret, fmt.Errorf("unexpected type found, expected submission, got: %T", v)
 		}
 
-		ret[k] = *vv
+		ret[k] = vv
 	}
 
 	return ret, nil
 }
 
 func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
-	obj, err := i.GetObject(new(Submission), submissionId)
+	obj, err := i.GetObject(s, submissionId)
 	if err != nil {
 		return s, fmt.Errorf("could not retrieve submission; %w", err)
 	}
 
-	vv, ok := obj.(*Submission)
+	vv, ok := obj.(Submission)
 	if !ok {
 		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj)
 	}
 
-	s = *vv
+	s = vv
 	return
 }
 
+func (i inter) PostClarification(problemId, text string) (Identifier, error) {
+	return i.postToId(i.contestPath("clarifications"), Clarification{
+		ProblemId: problemId,
+		Text:       text,
+	})
+}
+
+func (i inter) PostSubmission(problemId, languageId, file string) (Identifier, error) {
+	return i.postToId(i.contestPath("submissions"), Submission{
+		ProblemId:  problemId,
+		LanguageId: languageId,
+		File:       file,
+	})
+}
+
+func (i inter) Submit(s Submittable) (Identifier, error) {
+	return i.postToId(i.contestPath(s.Path()), s)
+}
+
 func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
-	objs, err := i.retrieve(interactor, id)
+	objs, err := i.retrieve(interactor, i.toPath(interactor)+ id, true)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve problem; %w", err)
+		return nil, fmt.Errorf("could not retrieve; %w", err)
 	}
 
 	if len(objs) != 1 {
@@ -126,12 +147,21 @@ func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
 	return objs[0], nil
 }
 
-func (i inter) GetObjects(interactor ApiType) ([]ApiType, error) {
-	return i.retrieve(interactor, "")
+func (i inter) toPath(interactor ApiType) string {
+	var base string
+	if interactor.InContest() {
+		base = "contests/" + i.contestId +"/"
+	}
+
+	return base + interactor.Path() + "/"
 }
 
-func (i inter) retrieve(interactor ApiType, id string) ([]ApiType, error) {
-	resp, err := i.Get(i.baseUrl + interactor.Path(i.contestId, id))
+func (i inter) GetObjects(interactor ApiType) ([]ApiType, error) {
+	return i.retrieve(interactor, i.toPath(interactor), false)
+}
+
+func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType, error) {
+	resp, err := i.Get(i.baseUrl + path)
 	if err != nil {
 		return nil, err
 	}
@@ -143,14 +173,19 @@ func (i inter) retrieve(interactor ApiType, id string) ([]ApiType, error) {
 		return nil, err
 	}
 
+	// If id is not empty, only a single instance is expected to be returned
+	if single {
+		bts, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil,fmt.Errorf("could not read entire body; %w", err)
+		}
+
+		in, err := interactor.FromJSON(bts)
+		return []ApiType{in}, err
+	}
+
 	// Some json should be returned, construct a decoder
 	decoder := json.NewDecoder(resp.Body)
-
-	// If id is not empty, only a single instance is expected to be returned
-	if id != "" {
-		in := interactor.Generate()
-		return []ApiType{in}, decoder.Decode(in)
-	}
 
 	// We read everything into a slice of
 	var temp []json.RawMessage
@@ -162,15 +197,39 @@ func (i inter) retrieve(interactor ApiType, id string) ([]ApiType, error) {
 	ret := make([]ApiType, len(temp))
 	for k, v := range temp {
 		// Generate a new interactor
-		in := interactor.Generate()
-		if err := in.FromJSON(v); err != nil {
+		vv, err := interactor.FromJSON(v)
+		if err != nil {
 			return ret, err
 		}
 
-		ret[k] = in
+		ret[k] = vv
 	}
 
 	return ret, nil
+}
+
+func (i inter) postToId(path string, encodableBody interface{}) (Identifier, error) {
+	var returnedId Identifier
+
+	var buf = new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(encodableBody)
+	if err != nil {
+		return returnedId, fmt.Errorf("could not marshal body; %w", err)
+	}
+
+	// Post the body
+	resp, err := i.Post(i.baseUrl + path, "application/json", buf)
+	if err != nil {
+		return returnedId, fmt.Errorf("could not post request; %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if err := statusToError(resp.StatusCode); err != nil {
+		return returnedId, err
+	}
+
+	return returnedId, json.NewDecoder(resp.Body).Decode(&returnedId)
 }
 
 func statusToError(status int) error {

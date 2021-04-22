@@ -26,6 +26,10 @@ type (
 
 		GetObject(interactor ApiType, id string) (ApiType, error)
 		GetObjects(interactor ApiType) ([]ApiType, error)
+
+		Submit(submittable Submittable) (Identifier, error)
+		PostClarification(problemId, text string) (Identifier, error)
+		PostSubmission(problemId, languageId, file string) (Identifier, error)
 	}
 
 	inter struct {
@@ -39,7 +43,8 @@ type (
 	// Implementation of the http.RoundTripper interface, used for always adding basic-auth
 	basicAuthTransport struct {
 		username, password string
-		T                  http.RoundTripper
+
+		T http.RoundTripper
 	}
 )
 
@@ -58,7 +63,7 @@ func (b basicAuthTransport) RoundTrip(request *http.Request) (*http.Response, er
 }
 
 func ContestInteractor(baseUrl, username, password, contestId string, insecure bool) (ContestApi, error) {
-	i := inter{
+	i := &inter{
 		baseUrl:   strings.TrimRight(baseUrl, "/") + "/",
 		username:  username,
 		password:  password,
@@ -75,7 +80,7 @@ func ContestInteractor(baseUrl, username, password, contestId string, insecure b
 }
 
 func ContestsInteractor(baseUrl, username, password string, insecure bool) (ContestsApi, error) {
-	return inter{
+	return &inter{
 		baseUrl:  strings.TrimRight(baseUrl, "/") + "/",
 		username: username,
 		password: password,
@@ -85,7 +90,7 @@ func ContestsInteractor(baseUrl, username, password string, insecure bool) (Cont
 
 // ToContest "upgrades" a ContestsApi to a ContestApi for a specific contest. When called from a ContestApi it can be
 // used to change the current contest associated with that ContestApi.
-func (i inter) ToContest(cid string) (ContestApi, error) {
+func (i *inter) ToContest(cid string) (ContestApi, error) {
 	i.contestId = cid
 
 	if _, err := i.ContestById(cid); err != nil {
@@ -93,6 +98,14 @@ func (i inter) ToContest(cid string) (ContestApi, error) {
 	}
 
 	return i, nil
+}
+
+func (i inter) contestPath(path string) string {
+	if i.contestId != "" {
+		return fmt.Sprintf("contests/%s/%s", i.contestId, path)
+	}
+
+	return path
 }
 
 func buildClient(username, password string, insecure bool) http.Client {

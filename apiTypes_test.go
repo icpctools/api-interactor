@@ -10,16 +10,15 @@ import (
 
 // Ensure all types adhere to required interfaces
 var (
-	_ ApiType = new(Contest)
-	_ ApiType = new(Problem)
-	_ ApiType = new(Submission)
+	_ ApiType = Contest{}
+	_ ApiType = Problem{}
+	_ ApiType = Submission{}
+	_ ApiType = Clarification{}
 
 	_ json.Unmarshaler = new(ApiTime)
-	_ JSONUnmarshaller = new(ApiTime)
 	_ fmt.Stringer     = new(ApiTime)
 
 	_ json.Unmarshaler = new(ApiRelTime)
-	_ JSONUnmarshaller = new(ApiRelTime)
 	_ fmt.Stringer     = new(ApiRelTime)
 )
 
