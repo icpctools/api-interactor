@@ -1,8 +1,14 @@
 package interactor
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,6 +37,29 @@ type (
 	// ApiRelTime is a time.Duration which marshals to and from the format used in the CCS Api
 	ApiRelTime time.Duration
 
+	// LocalFileReference is used to upload local files to the CCS Api
+	LocalFileReference interface {
+		AddFromFile(file *os.File) error
+		AddFromString(filename, body string) error
+	}
+
+	localFileData struct {
+		filename string
+		contents []byte
+	}
+
+	localFileReference struct {
+		files []localFileData
+	}
+
+	FileReference struct {
+		Href   string             `json:"href,omitempty"`
+		Mime   string             `json:"mime,omitempty"`
+		Width  int                `json:"width,omitempty"`
+		Height int                `json:"height,omitempty"`
+		Data   LocalFileReference `json:"data,omitempty"`
+	}
+
 	// TODO add omitempty to appropriate keys
 
 	Contest struct {
@@ -49,14 +78,14 @@ type (
 	}
 
 	Submission struct {
-		Id          string     `json:"id"`
-		LanguageId  string     `json:"language_id"`
-		ContestTime ApiRelTime `json:"contest_time"`
-		TeamId      string     `json:"team_id"`
-		ProblemId   string     `json:"problem_id"`
-		ExternalId  string     `json:"external_id"`
-		EntryPoint  string     `json:"entry_point"`
-		File        string     `json:"file"`
+		Id          string          `json:"id,omitempty"`
+		LanguageId  string          `json:"language_id"`
+		Time        ApiTime         `json:"time,omitempty"`
+		ContestTime ApiRelTime      `json:"contest_time,omitempty"`
+		TeamId      string          `json:"team_id,omitempty"`
+		ProblemId   string          `json:"problem_id"`
+		EntryPoint  string          `json:"entry_point,omitempty"`
+		Files       []FileReference `json:"files,omitempty"`
 	}
 
 	Clarification struct {
@@ -68,6 +97,14 @@ type (
 		Text        string     `json:"text"`
 		Time        *ApiTime   `json:"time,omitempty"`
 		ContestTime ApiRelTime `json:"contest_time,omitempty"`
+	}
+
+	Language struct {
+		Id                 string   `json:"id,omitempty"`
+		Name               string   `json:"name,omitempty"`
+		EntryPointRequired bool     `json:"entry_point_required"`
+		EntryPointName     string   `json:"entry_point_name,omitempty"`
+		Extensions         []string `json:"extensions"`
 	}
 
 	Identifier string
@@ -154,12 +191,12 @@ func (s Submission) String() string {
 	return fmt.Sprintf(`
           id: %v
  language id: %v
+        time: %v
 contest time: %v
      team id: %v
   problem id: %v
- external id: %v
  entry point: %v
-`, s.Id, s.LanguageId, s.ContestTime, s.TeamId, s.ProblemId, s.ExternalId, s.EntryPoint)
+`, s.Id, s.LanguageId, s.Time, s.ContestTime, s.TeamId, s.ProblemId, s.EntryPoint)
 }
 
 // -- Clarification implementation
@@ -193,7 +230,44 @@ func (c Clarification) String() string {
 `, c.FromTeamId, c.ToTeamId, c.ReplyToId, c.ProblemId, c.Text, c.Time, c.ContestTime)
 }
 
+// -- Language implementation
+
+func (l Language) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &l)
+	return l, err
+}
+
+func (l Language) InContest() bool {
+	return true
+}
+
+func (l Language) Path() string {
+	return "languages"
+}
+
+func (l Language) Generate() ApiType {
+	return Language{}
+}
+
+func (l Language) String() string {
+	return fmt.Sprintf(`
+                   id: %v
+                 name: %v
+ entry point required: %v
+     entry point name: %v
+           extensions: %v
+`, l.Id, l.Name, l.EntryPointRequired, l.EntryPointName, l.Extensions)
+}
+
 // -- ApiTime implementation
+
+func (a ApiTime) MarshalJSON() ([]byte, error) {
+	if a.Time().IsZero() {
+		return []byte("null"), nil
+	} else {
+		return a.Time().MarshalJSON()
+	}
+}
 
 func (a *ApiTime) UnmarshalJSON(b []byte) (err error) {
 	data := strings.Trim(string(b), "\"")
@@ -282,4 +356,71 @@ func (i *Identifier) UnmarshalJSON(bts []byte) error {
 	// It is expected to be a string, possible embedded in quotes
 	*i = Identifier(strings.Trim(string(bts), "\"'"))
 	return nil
+}
+
+// -- LocalFileReference implementation
+
+func NewLocalFileReference() LocalFileReference {
+	return &localFileReference{
+		files: make([]localFileData, 0),
+	}
+}
+
+func (r *localFileReference) AddFromFile(file *os.File) error {
+	filename := filepath.Base(file.Name())
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	fileData := localFileData{
+		filename: filename,
+		contents: data,
+	}
+	r.files = append(r.files, fileData)
+
+	return nil
+}
+
+func (r *localFileReference) AddFromString(filename, body string) error {
+	fileData := localFileData{
+		filename: filename,
+		contents: []byte(body),
+	}
+	r.files = append(r.files, fileData)
+
+	return nil
+}
+
+func (r *localFileReference) MarshalJSON() ([]byte, error) {
+	// Create the ZIP and put the contents in there
+	buffer := new(bytes.Buffer)
+	zipArchive := zip.NewWriter(buffer)
+	for _, file := range r.files {
+		f, err := zipArchive.Create(file.filename)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = f.Write(file.contents)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Now close the zip File
+	err := zipArchive.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	bufferData, err := ioutil.ReadAll(buffer)
+	if err != nil {
+		return nil, err
+	}
+
+	result := base64.StdEncoding.EncodeToString(bufferData)
+
+	return json.Marshal(result)
 }

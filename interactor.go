@@ -24,12 +24,15 @@ type (
 		Submissions() ([]Submission, error)
 		SubmissionById(submissionId string) (Submission, error)
 
+		Languages() ([]Language, error)
+		LanguageById(langugageId string) (Language, error)
+
 		GetObject(interactor ApiType, id string) (ApiType, error)
 		GetObjects(interactor ApiType) ([]ApiType, error)
 
 		Submit(submittable Submittable) (Identifier, error)
 		PostClarification(problemId, text string) (Identifier, error)
-		PostSubmission(problemId, languageId, file string) (Identifier, error)
+		PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Identifier, error)
 	}
 
 	inter struct {

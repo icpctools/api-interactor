@@ -114,6 +114,41 @@ func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
 	return
 }
 
+func (i inter) Languages() ([]Language, error) {
+	obj, err := i.GetObjects(Language{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve languages; %w", err)
+	}
+
+	// obj should be a slice of Language, cast to it to slice of Language
+	ret := make([]Language, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Language)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected language, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) LanguageById(languageId string) (l Language, err error) {
+	obj, err := i.GetObject(l, languageId)
+	if err != nil {
+		return l, fmt.Errorf("could not retrieve language; %w", err)
+	}
+
+	vv, ok := obj.(Language)
+	if !ok {
+		return l, fmt.Errorf("unexpected type found, expected language, got: %T", obj)
+	}
+
+	l = vv
+	return
+}
+
 func (i inter) PostClarification(problemId, text string) (Identifier, error) {
 	return i.postToId(i.contestPath("clarifications"), Clarification{
 		ProblemId: problemId,
@@ -121,11 +156,17 @@ func (i inter) PostClarification(problemId, text string) (Identifier, error) {
 	})
 }
 
-func (i inter) PostSubmission(problemId, languageId, file string) (Identifier, error) {
+func (i inter) PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Identifier, error) {
 	return i.postToId(i.contestPath("submissions"), Submission{
 		ProblemId:  problemId,
 		LanguageId: languageId,
-		File:       file,
+		EntryPoint: entrypoint,
+		Files: []FileReference{
+			{
+				Mime: "application/zip",
+				Data: files,
+			},
+		},
 	})
 }
 
@@ -208,7 +249,7 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 	return ret, nil
 }
 
-func (i inter) postToId(path string, encodableBody interface{}) (Identifier, error) {
+func (i inter) postToId(path string, encodableBody Submittable) (Identifier, error) {
 	var returnedId Identifier
 
 	var buf = new(bytes.Buffer)
