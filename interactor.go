@@ -25,7 +25,7 @@ type (
 		SubmissionById(submissionId string) (Submission, error)
 
 		Languages() ([]Language, error)
-		LanguageById(langugageId string) (Language, error)
+		LanguageById(languageId string) (Language, error)
 
 		GetObject(interactor ApiType, id string) (ApiType, error)
 		GetObjects(interactor ApiType) ([]ApiType, error)

@@ -2,7 +2,6 @@ package interactor
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 
@@ -153,12 +152,10 @@ func TestSubmissionRetrieval(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, submissions)
 
-		fmt.Println(submissions)
-
 		for _, submission := range submissions {
 			if submission.Id != "" {
 				submissionId = submission.Id
-				fmt.Printf("Found submission %+v\n", submission)
+				t.Logf("Found submission %+v\n", submission)
 				return
 			}
 		}
@@ -169,7 +166,7 @@ func TestSubmissionRetrieval(t *testing.T) {
 			t.Skip("no submission could be found, retrieving single submission cannot be tested")
 		}
 
-		fmt.Println(submissionId, testUser, testPass)
+		t.Log(submissionId, testUser, testPass)
 
 		submission, err := api.SubmissionById(submissionId)
 		assert.Nil(t, err)
@@ -186,12 +183,12 @@ func TestLanguageRetrieval(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, languages)
 
-		fmt.Println(languages)
+		t.Log(languages)
 
 		for _, language := range languages {
 			if language.Id != "" {
 				languageId = language.Id
-				fmt.Printf("Found language %+v\n", language)
+				t.Logf("Found language %+v\n", language)
 				return
 			}
 		}
@@ -202,7 +199,7 @@ func TestLanguageRetrieval(t *testing.T) {
 			t.Skip("no language could be found, retrieving single language cannot be tested")
 		}
 
-		fmt.Println(languageId, testUser, testPass)
+		t.Log(languageId, testUser, testPass)
 
 		language, err := api.LanguageById(languageId)
 		assert.Nil(t, err)
@@ -239,8 +236,8 @@ func TestSendClarification(t *testing.T) {
 		}
 
 		bts, err := json.Marshal(clar)
-
-		fmt.Printf("%s\n", bts)
+		assert.Nil(t, err)
+		assert.NotNil(t, bts)
 
 		id, err := api.Submit(&clar)
 
@@ -255,7 +252,7 @@ func TestPostSubmission(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		api := teamInteractor(t)
 
-		id, err := api.PostSubmission("A", "cpp", "", NewLocalFileReference())
+		id, err := api.PostSubmission("A", "cpp", "", new(localFileReference))
 		assert.Empty(t, id)
 		assert.NotNil(t, err)
 
@@ -265,10 +262,10 @@ func TestPostSubmission(t *testing.T) {
 	t.Run("authorized", func(t *testing.T) {
 		api := teamInteractor(t)
 
-		sampleSubmission := NewLocalFileReference()
-		_ = sampleSubmission.AddFromString("sample.cpp", "int main() { return 0; }")
+		sampleSubmission := new(localFileReference)
+		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		goModFile, _ := os.Open("go.mod")
-		_ = sampleSubmission.AddFromFile(goModFile)
+		_ = sampleSubmission.FromFile(goModFile)
 		id, err := api.PostSubmission("accesspoints", "cpp", "", sampleSubmission)
 		assert.Nil(t, err)
 		assert.NotEmpty(t, id)
@@ -278,12 +275,12 @@ func TestPostSubmission(t *testing.T) {
 
 	t.Run("authorized-struct", func(t *testing.T) {
 		api := teamInteractor(t)
-		sampleSubmission := NewLocalFileReference()
-		_ = sampleSubmission.AddFromString("sample.cpp", "int main() { return 0; }")
+		sampleSubmission := new(localFileReference)
+		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		submission := Submission{
 			ProblemId:  "accesspoints",
 			LanguageId: "cpp",
-			Time:       ApiTime{},
+			Time:       new(ApiTime),
 			Files: []FileReference{
 				{
 					Mime: "application/zip",
@@ -293,11 +290,10 @@ func TestPostSubmission(t *testing.T) {
 		}
 
 		bts, err := json.Marshal(submission)
-
-		fmt.Printf("%s\n", bts)
+		assert.Nil(t, err)
+		assert.NotNil(t, bts)
 
 		id, err := api.Submit(&submission)
-
 		assert.Nil(t, err)
 		assert.NotEmpty(t, id)
 
