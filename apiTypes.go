@@ -39,8 +39,8 @@ type (
 
 	// LocalFileReference is used to upload local files to the CCS Api
 	LocalFileReference interface {
-		AddFromFile(file *os.File) error
-		AddFromString(filename, body string) error
+		FromFile(file *os.File) error
+		FromString(filename, body string) error
 	}
 
 	localFileData struct {
@@ -60,7 +60,9 @@ type (
 		Data   LocalFileReference `json:"data,omitempty"`
 	}
 
-	// TODO add omitempty to appropriate keys
+	// TODO add omitempty to appropriate keys, ensure that "Time"s that are omitempty are references to ensure
+	//      the time is actually omitted. This is due to ApiTime is based on time.Time which is almost always a
+	//      non-empty struct.
 
 	Contest struct {
 		Id         string     `json:"id"`
@@ -80,7 +82,7 @@ type (
 	Submission struct {
 		Id          string          `json:"id,omitempty"`
 		LanguageId  string          `json:"language_id"`
-		Time        ApiTime         `json:"time,omitempty"`
+		Time        *ApiTime        `json:"time,omitempty"`
 		ContestTime ApiRelTime      `json:"contest_time,omitempty"`
 		TeamId      string          `json:"team_id,omitempty"`
 		ProblemId   string          `json:"problem_id"`
@@ -360,40 +362,35 @@ func (i *Identifier) UnmarshalJSON(bts []byte) error {
 
 // -- LocalFileReference implementation
 
-func NewLocalFileReference() LocalFileReference {
-	return &localFileReference{
-		files: make([]localFileData, 0),
+func (r *localFileReference) FromFile(file *os.File) error {
+	if file == nil {
+		return fmt.Errorf("file is nil")
 	}
-}
 
-func (r *localFileReference) AddFromFile(file *os.File) error {
 	filename := filepath.Base(file.Name())
-
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return err
 	}
 
-	fileData := localFileData{
+	r.files = append(r.files, localFileData{
 		filename: filename,
 		contents: data,
-	}
-	r.files = append(r.files, fileData)
+	})
 
 	return nil
 }
 
-func (r *localFileReference) AddFromString(filename, body string) error {
-	fileData := localFileData{
+func (r *localFileReference) FromString(filename, body string) error {
+	r.files = append(r.files, localFileData{
 		filename: filename,
 		contents: []byte(body),
-	}
-	r.files = append(r.files, fileData)
+	})
 
 	return nil
 }
 
-func (r *localFileReference) MarshalJSON() ([]byte, error) {
+func (r localFileReference) MarshalJSON() ([]byte, error) {
 	// Create the ZIP and put the contents in there
 	buffer := new(bytes.Buffer)
 	zipArchive := zip.NewWriter(buffer)
@@ -420,7 +417,7 @@ func (r *localFileReference) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
+	// Base64 encode the zipped contents
 	result := base64.StdEncoding.EncodeToString(bufferData)
-
 	return json.Marshal(result)
 }
