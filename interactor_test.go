@@ -252,7 +252,7 @@ func TestPostSubmission(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		api := teamInteractor(t)
 
-		id, err := api.PostSubmission("A", "cpp", "", new(localFileReference))
+		id, err := api.PostSubmission("A", "cpp", "", LocalFileReference{})
 		assert.Empty(t, id)
 		assert.NotNil(t, err)
 
@@ -262,7 +262,7 @@ func TestPostSubmission(t *testing.T) {
 	t.Run("authorized", func(t *testing.T) {
 		api := teamInteractor(t)
 
-		sampleSubmission := new(localFileReference)
+		var sampleSubmission LocalFileReference
 		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		goModFile, _ := os.Open("go.mod")
 		_ = sampleSubmission.FromFile(goModFile)
@@ -275,7 +275,7 @@ func TestPostSubmission(t *testing.T) {
 
 	t.Run("authorized-struct", func(t *testing.T) {
 		api := teamInteractor(t)
-		sampleSubmission := new(localFileReference)
+		var sampleSubmission LocalFileReference
 		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		submission := Submission{
 			ProblemId:  "accesspoints",
