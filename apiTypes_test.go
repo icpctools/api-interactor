@@ -23,8 +23,6 @@ var (
 
 	_ Submittable = Clarification{}
 
-	_ LocalFileReference = new(localFileReference)
-
 	_ json.Marshaler   = new(ApiTime)
 	_ json.Unmarshaler = new(ApiTime)
 	_ fmt.Stringer     = new(ApiTime)
@@ -32,7 +30,7 @@ var (
 	_ json.Unmarshaler = new(ApiRelTime)
 	_ fmt.Stringer     = new(ApiRelTime)
 
-	_ json.Marshaler = new(localFileReference)
+	_ json.Marshaler = new(LocalFileReference)
 )
 
 func TestApiTime_UnmarshalJSON(t *testing.T) {
@@ -107,7 +105,7 @@ func TestApiRelTime_UnmarshalJSON(t *testing.T) {
 
 func TestLocalFileReference_MarshalJSON(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		fr := new(localFileReference)
+		fr := new(LocalFileReference)
 
 		// Test empty file reference
 		data, err := json.Marshal(fr)
@@ -132,7 +130,7 @@ func TestLocalFileReference_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("filled", func(t *testing.T) {
-		fr := new(localFileReference)
+		fr := new(LocalFileReference)
 
 		// Add some files, test it again
 		err := fr.FromString("sample.txt", "This is a sample")

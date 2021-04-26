@@ -37,18 +37,12 @@ type (
 	// ApiRelTime is a time.Duration which marshals to and from the format used in the CCS Api
 	ApiRelTime time.Duration
 
-	// LocalFileReference is used to upload local files to the CCS Api
-	LocalFileReference interface {
-		FromFile(file *os.File) error
-		FromString(filename, body string) error
-	}
-
 	localFileData struct {
 		filename string
 		contents []byte
 	}
 
-	localFileReference struct {
+	LocalFileReference struct {
 		files []localFileData
 	}
 
@@ -362,7 +356,7 @@ func (i *Identifier) UnmarshalJSON(bts []byte) error {
 
 // -- LocalFileReference implementation
 
-func (r *localFileReference) FromFile(file *os.File) error {
+func (r *LocalFileReference) FromFile(file *os.File) error {
 	if file == nil {
 		return fmt.Errorf("file is nil")
 	}
@@ -381,7 +375,7 @@ func (r *localFileReference) FromFile(file *os.File) error {
 	return nil
 }
 
-func (r *localFileReference) FromString(filename, body string) error {
+func (r *LocalFileReference) FromString(filename, body string) error {
 	r.files = append(r.files, localFileData{
 		filename: filename,
 		contents: []byte(body),
@@ -390,7 +384,7 @@ func (r *localFileReference) FromString(filename, body string) error {
 	return nil
 }
 
-func (r localFileReference) MarshalJSON() ([]byte, error) {
+func (r LocalFileReference) MarshalJSON() ([]byte, error) {
 	// Create the ZIP and put the contents in there
 	buffer := new(bytes.Buffer)
 	zipArchive := zip.NewWriter(buffer)
