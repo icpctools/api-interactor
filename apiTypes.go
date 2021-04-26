@@ -49,15 +49,15 @@ type (
 	}
 
 	Submission struct {
-	Id          string     `json:"id"`
-	LanguageId  string     `json:"language_id"`
-	ContestTime ApiRelTime `json:"contest_time"`
-	TeamId      string     `json:"team_id"`
-	ProblemId   string     `json:"problem_id"`
-	ExternalId  string     `json:"external_id"`
-	EntryPoint  string     `json:"entry_point"`
-	File        string     `json:"file"`
-}
+		Id          string     `json:"id"`
+		LanguageId  string     `json:"language_id"`
+		ContestTime ApiRelTime `json:"contest_time"`
+		TeamId      string     `json:"team_id"`
+		ProblemId   string     `json:"problem_id"`
+		ExternalId  string     `json:"external_id"`
+		EntryPoint  string     `json:"entry_point"`
+		File        string     `json:"file"`
+	}
 
 	Clarification struct {
 		Id          string     `json:"id,omitempty"`

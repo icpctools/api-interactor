@@ -117,7 +117,7 @@ func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
 func (i inter) PostClarification(problemId, text string) (Identifier, error) {
 	return i.postToId(i.contestPath("clarifications"), Clarification{
 		ProblemId: problemId,
-		Text:       text,
+		Text:      text,
 	})
 }
 
@@ -134,7 +134,7 @@ func (i inter) Submit(s Submittable) (Identifier, error) {
 }
 
 func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
-	objs, err := i.retrieve(interactor, i.toPath(interactor)+ id, true)
+	objs, err := i.retrieve(interactor, i.toPath(interactor)+id, true)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve; %w", err)
@@ -150,7 +150,7 @@ func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
 func (i inter) toPath(interactor ApiType) string {
 	var base string
 	if interactor.InContest() {
-		base = "contests/" + i.contestId +"/"
+		base = "contests/" + i.contestId + "/"
 	}
 
 	return base + interactor.Path() + "/"
@@ -177,7 +177,7 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 	if single {
 		bts, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil,fmt.Errorf("could not read entire body; %w", err)
+			return nil, fmt.Errorf("could not read entire body; %w", err)
 		}
 
 		in, err := interactor.FromJSON(bts)
@@ -218,7 +218,7 @@ func (i inter) postToId(path string, encodableBody interface{}) (Identifier, err
 	}
 
 	// Post the body
-	resp, err := i.Post(i.baseUrl + path, "application/json", buf)
+	resp, err := i.Post(i.baseUrl+path, "application/json", buf)
 	if err != nil {
 		return returnedId, fmt.Errorf("could not post request; %w", err)
 	}
