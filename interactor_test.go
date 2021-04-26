@@ -10,10 +10,12 @@ import (
 )
 
 var (
-	testUser    = envFallback("TEST_USER", "admin")
-	testPass    = envFallback("TEST_PASS", "admin")
-	testBase    = envFallback("TEST_BASE", "https://www.domjudge.org/demoweb/api")
-	testContest = envFallback("TEST_CONTEST", "nwerc18")
+	testUser     = envFallback("TEST_USER", "admin")
+	testPass     = envFallback("TEST_PASS", "admin")
+	testTeamUser = envFallback("TEST_TEAM_USER", "team")
+	testTeamPass = envFallback("TEST_TEAM_PASS", "team")
+	testBase     = envFallback("TEST_BASE", "https://www.domjudge.org/demoweb/api")
+	testContest  = envFallback("TEST_CONTEST", "nwerc18")
 
 	testContestWrong = envFallback("TEST_CONTEST_WRONG", "NON_EXISTENT_CONTEST_ID_I_HOPE")
 
@@ -32,6 +34,13 @@ func envFallback(k, fb string) string {
 
 func interactor(t assert.TestingT) ContestApi {
 	api, err := ContestInteractor(testBase, testUser, testPass, testContest, true)
+	assert.Nil(t, err)
+	assert.NotNil(t, api)
+	return api
+}
+
+func teamInteractor(t assert.TestingT) ContestApi {
+	api, err := ContestInteractor(testBase, testTeamUser, testTeamPass, testContest, true)
 	assert.Nil(t, err)
 	assert.NotNil(t, api)
 	return api
@@ -57,7 +66,7 @@ func TestContestsInteractor(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, interactor)
 
-		// Upgrading to a ContesInteractor should fail! The api should be nil such that it is not usable
+		// Upgrading to a ContestInteractor should fail! The api should be nil such that it is not usable
 		api, err := interactor.ToContest(testContest)
 		assert.NotNil(t, err)
 		assert.Nil(t, api)
@@ -168,14 +177,48 @@ func TestSubmissionRetrieval(t *testing.T) {
 	})
 }
 
+func TestLanguageRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	var languageId string
+	t.Run("all-languages", func(t *testing.T) {
+		languages, err := api.Languages()
+		assert.Nil(t, err)
+		assert.NotNil(t, languages)
+
+		fmt.Println(languages)
+
+		for _, language := range languages {
+			if language.Id != "" {
+				languageId = language.Id
+				fmt.Printf("Found language %+v\n", language)
+				return
+			}
+		}
+	})
+
+	t.Run("single-language", func(t *testing.T) {
+		if languageId == "" {
+			t.Skip("no language could be found, retrieving single language cannot be tested")
+		}
+
+		fmt.Println(languageId, testUser, testPass)
+
+		language, err := api.LanguageById(languageId)
+		assert.Nil(t, err)
+		assert.EqualValues(t, languageId, language.Id)
+	})
+}
+
 func TestSendClarification(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		api := interactor(t)
 
 		id, err := api.PostClarification("A", "testing clarification")
+		assert.Empty(t, id)
 		assert.NotNil(t, err)
 
-		t.Logf("Sent clarification, got id: '%v'", id)
+		t.Logf("Sent clarification, got error: '%v'", err)
 	})
 
 	t.Run("authorized", func(t *testing.T) {
@@ -205,5 +248,59 @@ func TestSendClarification(t *testing.T) {
 		assert.NotEmpty(t, id)
 
 		t.Logf("Sent clarification, got id: '%v'", id)
+	})
+}
+
+func TestPostSubmission(t *testing.T) {
+	t.Run("unauthorized", func(t *testing.T) {
+		api := teamInteractor(t)
+
+		id, err := api.PostSubmission("A", "cpp", "", NewLocalFileReference())
+		assert.Empty(t, id)
+		assert.NotNil(t, err)
+
+		t.Logf("Sent submission, got error: '%v'", err)
+	})
+
+	t.Run("authorized", func(t *testing.T) {
+		api := teamInteractor(t)
+
+		sampleSubmission := NewLocalFileReference()
+		_ = sampleSubmission.AddFromString("sample.cpp", "int main() { return 0; }")
+		goModFile, _ := os.Open("go.mod")
+		_ = sampleSubmission.AddFromFile(goModFile)
+		id, err := api.PostSubmission("accesspoints", "cpp", "", sampleSubmission)
+		assert.Nil(t, err)
+		assert.NotEmpty(t, id)
+
+		t.Logf("Sent submission, got id: '%v'", id)
+	})
+
+	t.Run("authorized-struct", func(t *testing.T) {
+		api := teamInteractor(t)
+		sampleSubmission := NewLocalFileReference()
+		_ = sampleSubmission.AddFromString("sample.cpp", "int main() { return 0; }")
+		submission := Submission{
+			ProblemId:  "accesspoints",
+			LanguageId: "cpp",
+			Time:       ApiTime{},
+			Files: []FileReference{
+				{
+					Mime: "application/zip",
+					Data: sampleSubmission,
+				},
+			},
+		}
+
+		bts, err := json.Marshal(submission)
+
+		fmt.Printf("%s\n", bts)
+
+		id, err := api.Submit(&submission)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, id)
+
+		t.Logf("Sent submission, got id: '%v'", id)
 	})
 }
