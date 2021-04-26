@@ -80,15 +80,13 @@ func TestContestsInteractor(t *testing.T) {
 }
 
 func TestContestRetrieval(t *testing.T) {
-	api	:= interactor(t)
-
+	api := interactor(t)
 
 	var contestId string
 	t.Run("all-contests", func(t *testing.T) {
 		contests, err := api.Contests()
 		assert.Nil(t, err)
 		assert.NotNil(t, contests)
-
 
 		for _, contest := range contests {
 			if contest.Id != "" {
@@ -110,7 +108,7 @@ func TestContestRetrieval(t *testing.T) {
 }
 
 func TestProblemRetrieval(t *testing.T) {
-	api	:= interactor(t)
+	api := interactor(t)
 
 	var problemId string
 	t.Run("all-problems", func(t *testing.T) {
@@ -138,7 +136,7 @@ func TestProblemRetrieval(t *testing.T) {
 }
 
 func TestSubmissionRetrieval(t *testing.T) {
-	api	:= interactor(t)
+	api := interactor(t)
 
 	var submissionId string
 	t.Run("all-submissions", func(t *testing.T) {
@@ -172,7 +170,7 @@ func TestSubmissionRetrieval(t *testing.T) {
 
 func TestSendClarification(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		api	:= interactor(t)
+		api := interactor(t)
 
 		id, err := api.PostClarification("A", "testing clarification")
 		assert.NotNil(t, err)
@@ -181,7 +179,7 @@ func TestSendClarification(t *testing.T) {
 	})
 
 	t.Run("authorized", func(t *testing.T) {
-		api	:= interactor(t)
+		api := interactor(t)
 
 		id, err := api.PostClarification("accesspoints", "testing clarification")
 		assert.Nil(t, err)
@@ -191,10 +189,10 @@ func TestSendClarification(t *testing.T) {
 	})
 
 	t.Run("authorized-struct", func(t *testing.T) {
-		api	:= interactor(t)
-		clar := Clarification {
+		api := interactor(t)
+		clar := Clarification{
 			ProblemId: "accesspoints",
-			Text: "This is only a test",
+			Text:      "This is only a test",
 		}
 
 		bts, err := json.Marshal(clar)
