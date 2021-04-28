@@ -73,7 +73,6 @@ func TestApiTime_MarshalJSON(t *testing.T) {
 
 		bts, err := json.Marshal(ti)
 		assert.Nil(t, err)
-		fmt.Println(string(bts))
 		assert.EqualValues(t, "{}", bts)
 	})
 }
