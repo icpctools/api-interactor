@@ -346,6 +346,22 @@ func (a ApiTime) String() string {
 	return time.Time(a).String()
 }
 
+func (a ApiTime) Before(b ApiTime) bool {
+	return a.Time().Before(b.Time())
+}
+
+func (a ApiTime) After(b ApiTime) bool {
+	return a.Time().After(b.Time())
+}
+
+func (a ApiTime) Equal(b ApiTime) bool {
+	return a.Time().Equal(b.Time())
+}
+
+func (a ApiTime) AddDuration(d ApiRelTime) ApiTime {
+	return ApiTime(a.Time().Add(d.Duration()))
+}
+
 // -- Identifier implementation
 
 func (i *Identifier) UnmarshalJSON(bts []byte) error {
