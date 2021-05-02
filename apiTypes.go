@@ -79,9 +79,27 @@ type (
 		Time        *ApiTime        `json:"time,omitempty"`
 		ContestTime ApiRelTime      `json:"contest_time,omitempty"`
 		TeamId      string          `json:"team_id,omitempty"`
-		ProblemId   string          `json:"problem_id"`
+		ProblemId   string          `json:"problem_id,omitempty"`
 		EntryPoint  string          `json:"entry_point,omitempty"`
 		Files       []FileReference `json:"files,omitempty"`
+	}
+
+	JudgementType struct {
+		Id      string `json:"id,omitempty"`
+		Name    string `json:"name"`
+		Penalty bool   `json:"penalty,omitempty"`
+		Solved  bool   `json:"solved"`
+	}
+
+	Judgement struct {
+		Id               string     `json:"id,omitempty"`
+		SubmissionId     string     `json:"submission_id"`
+		JudgementTypeId  string     `json:"judgement_type_id,omitempty"`
+		StartTime        *ApiTime   `json:"start_time"`
+		StartContestTime ApiRelTime `json:"start_contest_time"`
+		EndTime          *ApiTime   `json:"end_time,omitempty"`
+		EndContestTime   ApiRelTime `json:"end_contest_time,omitempty"`
+		MaxRunTime       number     `json:"max_run_time,omitempty"`
 	}
 
 	Clarification struct {
@@ -193,6 +211,63 @@ contest time: %v
   problem id: %v
  entry point: %v
 `, s.Id, s.LanguageId, s.Time, s.ContestTime, s.TeamId, s.ProblemId, s.EntryPoint)
+}
+
+// -- Judgement Type implementation
+
+func (jt JudgementType) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &jt)
+	return jt, err
+}
+
+func (jt JudgementType) InContest() bool {
+	return true
+}
+
+func (jt JudgementType) Path() string {
+	return "judgement-types"
+}
+
+func (jt JudgementType) Generate() ApiType {
+	return JudgementType{}
+}
+
+func (jt JudgementType) String() string {
+	return fmt.Sprintf(`
+       id: %v
+     name: %v
+  penalty: %v
+   solved: %v
+`, jt.Id, jt.Name, jt.Penalty, jt.Solved)
+}
+
+// -- Judgement implementation
+
+func (j Judgement) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &j)
+	return j, err
+}
+
+func (j Judgement) InContest() bool {
+	return true
+}
+
+func (j Judgement) Path() string {
+	return "judgements"
+}
+
+func (j Judgement) Generate() ApiType {
+	return Judgement{}
+}
+
+func (j Judgement) String() string {
+	return fmt.Sprintf(`
+                id: %v
+     submission id: %v
+ judgement type id: %v
+start contest time: %v
+  end contest time: %v
+`, j.Id, j.SubmissionId, j.JudgementTypeId, j.StartContestTime, j.EndContestTime)
 }
 
 // -- Clarification implementation
