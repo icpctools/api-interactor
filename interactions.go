@@ -149,6 +149,111 @@ func (i inter) LanguageById(languageId string) (l Language, err error) {
 	return
 }
 
+func (i inter) JudgementTypes() ([]JudgementType, error) {
+	obj, err := i.GetObjects(JudgementType{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve judgement types; %w", err)
+	}
+
+	// obj should be a slice of JudgementType, cast to it to slice of JudgementType
+	ret := make([]JudgementType, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(JudgementType)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected judgement type, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) JudgementTypeById(judgementTypeId string) (jt JudgementType, err error) {
+	obj, err := i.GetObject(jt, judgementTypeId)
+	if err != nil {
+		return jt, fmt.Errorf("could not retrieve judgement type; %w", err)
+	}
+
+	vv, ok := obj.(JudgementType)
+	if !ok {
+		return jt, fmt.Errorf("unexpected type found, expected judgement type, got: %T", obj)
+	}
+
+	jt = vv
+	return
+}
+
+func (i inter) Judgements() ([]Judgement, error) {
+	obj, err := i.GetObjects(Judgement{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve judgements; %w", err)
+	}
+
+	// obj should be a slice of Judgement, cast to it to slice of Judgement
+	ret := make([]Judgement, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Judgement)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected judgement, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) JudgementById(judgementId string) (j Judgement, err error) {
+	obj, err := i.GetObject(j, judgementId)
+	if err != nil {
+		return j, fmt.Errorf("could not retrieve judgement; %w", err)
+	}
+
+	vv, ok := obj.(Judgement)
+	if !ok {
+		return j, fmt.Errorf("unexpected type found, expected judgement, got: %T", obj)
+	}
+
+	j = vv
+	return
+}
+
+func (i inter) Clarifications() ([]Clarification, error) {
+	obj, err := i.GetObjects(Clarification{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve clarifications; %w", err)
+	}
+
+	// obj should be a slice of Clarification, cast to it to slice of Clarification
+	ret := make([]Clarification, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Clarification)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected clarification, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) ClarificationById(clarificationId string) (c Clarification, err error) {
+	obj, err := i.GetObject(c, clarificationId)
+	if err != nil {
+		return c, fmt.Errorf("could not retrieve clarification; %w", err)
+	}
+
+	vv, ok := obj.(Clarification)
+	if !ok {
+		return c, fmt.Errorf("unexpected type found, expected clarification, got: %T", obj)
+	}
+
+	c = vv
+	return
+}
+
 func (i inter) PostClarification(problemId, text string) (Identifier, error) {
 	return i.postToId(i.contestPath("clarifications"), Clarification{
 		ProblemId: problemId,

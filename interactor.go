@@ -21,8 +21,17 @@ type (
 		Problems() ([]Problem, error)
 		ProblemById(problemId string) (Problem, error)
 
+		JudgementTypes() ([]JudgementType, error)
+		JudgementTypeById(judgementTypeId string) (JudgementType, error)
+
 		Submissions() ([]Submission, error)
 		SubmissionById(submissionId string) (Submission, error)
+
+		Judgements() ([]Judgement, error)
+		JudgementById(judgementId string) (Judgement, error)
+
+		Clarifications() ([]Clarification, error)
+		ClarificationById(clarificationId string) (Clarification, error)
 
 		Languages() ([]Language, error)
 		LanguageById(languageId string) (Language, error)
