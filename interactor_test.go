@@ -202,6 +202,34 @@ func TestSubmissionRetrieval(t *testing.T) {
 	})
 }
 
+func TestJudgementRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	var jtId string
+	t.Run("all-judgements", func(t *testing.T) {
+		judgements, err := api.Judgements()
+		assert.Nil(t, err)
+		assert.NotNil(t, judgements)
+
+		for _, jt := range judgements {
+			if jt.Id != "" {
+				jtId = jt.Id
+				return
+			}
+		}
+	})
+
+	t.Run("single-judgement", func(t *testing.T) {
+		if jtId == "" {
+			t.Skip("no judgement could be found, retrieving single judgement cannot be tested")
+		}
+
+		jt, err := api.JudgementById(jtId)
+		assert.Nil(t, err)
+		assert.EqualValues(t, jtId, jt.Id)
+	})
+}
+
 func TestLanguageRetrieval(t *testing.T) {
 	api := interactor(t)
 
@@ -257,7 +285,7 @@ func TestClarificationRetrieval(t *testing.T) {
 			t.Skip("no clarification could be found, retrieving single clarification cannot be tested")
 		}
 
-		clarification, err := api.ProblemById(clarificationId)
+		clarification, err := api.ClarificationById(clarificationId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, clarificationId, clarification.Id)
 	})
