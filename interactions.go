@@ -32,7 +32,7 @@ func (i inter) ContestById(contestId string) (c Contest, err error) {
 	// Retrieve all contests and check whether the contest exists, TODO decide on whether to optimize
 	contests, err := i.Contests()
 	if err != nil {
-		return c, fmt.Errorf("could not retrieve contest")
+		return c, fmt.Errorf("could not retrieve contest; %w", err)
 	}
 
 	for _, v := range contests {
@@ -315,7 +315,7 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 	// Body is not-nil, ensure it will always be closed
 	defer resp.Body.Close()
 
-	if err := statusToError(resp.StatusCode); err != nil {
+	if err := responseToError(resp); err != nil {
 		return nil, err
 	}
 
@@ -371,22 +371,31 @@ func (i inter) postToId(path string, encodableBody Submittable) (Identifier, err
 
 	defer resp.Body.Close()
 
-	if err := statusToError(resp.StatusCode); err != nil {
+	if err := responseToError(resp); err != nil {
 		return returnedId, err
 	}
 
 	return returnedId, json.NewDecoder(resp.Body).Decode(&returnedId)
 }
 
-func statusToError(status int) error {
-	switch status {
+func responseToError(r *http.Response) error {
+	var statusErr error
+	switch r.StatusCode {
 	case http.StatusOK:
-		return nil
+		return statusErr
 	case http.StatusUnauthorized:
-		return errUnauthorized
+		statusErr = errUnauthorized
 	case http.StatusNotFound:
-		return errNotFound
+		statusErr = errNotFound
 	default:
-		return fmt.Errorf("invalid statuscode received: %d", status)
+		statusErr = fmt.Errorf("invalid statuscode received: %d", r.StatusCode)
 	}
+
+	// Read the contents
+	bts, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return fmt.Errorf("API error encountered (%v), furthermore an error was encountered while reading the response: %w", statusErr, err)
+	}
+
+	return fmt.Errorf("API error '%s' (%w)", bts, statusErr)
 }

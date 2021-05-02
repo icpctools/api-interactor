@@ -1,12 +1,23 @@
 package interactor
 
 import (
+	"crypto/x509"
 	"encoding/json"
+	"errors"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+// testLogger is an interface to pass the testing Type to a method that only needs a logger
+type testLogger interface {
+	Logf(string, ...interface{})
+}
 
 var (
 	testUser     = envFallback("TEST_USER", "admin")
@@ -32,14 +43,14 @@ func envFallback(k, fb string) string {
 }
 
 func interactor(t assert.TestingT) ContestApi {
-	api, err := ContestInteractor(testBase, testUser, testPass, testContest, true)
+	api, err := ContestInteractor(testBase, testUser, testPass, testContest, false)
 	assert.Nil(t, err)
 	assert.NotNil(t, api)
 	return api
 }
 
 func teamInteractor(t assert.TestingT) ContestApi {
-	api, err := ContestInteractor(testBase, testTeamUser, testTeamPass, testContest, true)
+	api, err := ContestInteractor(testBase, testTeamUser, testTeamPass, testContest, false)
 	assert.Nil(t, err)
 	assert.NotNil(t, api)
 	return api
@@ -47,13 +58,13 @@ func teamInteractor(t assert.TestingT) ContestApi {
 
 func TestContestInteractor(t *testing.T) {
 	t.Run("invalid-contest-id", func(t *testing.T) {
-		interactor, err := ContestInteractor(testBase, testUser, testPass, testContestWrong, true)
+		interactor, err := ContestInteractor(testBase, testUser, testPass, testContestWrong, false)
 		assert.NotNil(t, err)
 		assert.Nil(t, interactor)
 	})
 
 	t.Run("valid-contest-id", func(t *testing.T) {
-		interactor, err := ContestInteractor(testBase, testUser, testPass, testContest, true)
+		interactor, err := ContestInteractor(testBase, testUser, testPass, testContest, false)
 		assert.Nil(t, err)
 		assert.NotNil(t, interactor)
 	})
@@ -61,7 +72,7 @@ func TestContestInteractor(t *testing.T) {
 
 func TestContestsInteractor(t *testing.T) {
 	t.Run("invalid-base", func(t *testing.T) {
-		interactor, err := ContestsInteractor("this-does-not-exists", "", "", true)
+		interactor, err := ContestsInteractor("this-does-not-exists", "", "", false)
 		assert.Nil(t, err)
 		assert.NotNil(t, interactor)
 
@@ -383,4 +394,92 @@ func TestPostSubmission(t *testing.T) {
 
 		t.Logf("Sent submission, got id: '%v'", id)
 	})
+}
+
+func TestInvalidCert(t *testing.T) {
+	// This test forces x509 key errors by using a proxy with an invalid certificate
+
+	// Create handling with a reverse proxy
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		rr, err := http.NewRequest(request.Method, testBase+request.URL.String(), request.Body)
+		assert.Nil(t, err)
+
+		resp, err := http.DefaultClient.Do(rr)
+		assert.Nil(t, err)
+
+		writer.WriteHeader(resp.StatusCode)
+		_, err = io.Copy(writer, resp.Body)
+		assert.Nil(t, err)
+	})
+
+	// Start an internal tls server that is only valid for "example.com"
+	var err error
+	ser := httptest.NewUnstartedServer(http.DefaultServeMux)
+	ser.Listener, err = net.Listen("tcp", "127.0.0.1:8888")
+	assert.Nil(t, err)
+	go ser.StartTLS()
+	defer ser.Close()
+
+	t.Run("contest", func(t *testing.T) {
+		api, err := ContestInteractor("https://localhost:8888", testUser, testPass, testContest, false)
+		assert.NotNil(t, err)
+		assert.Nil(t, api)
+
+		isX509, err := unwrapsToX509Error(t, err)
+		assert.True(t, isX509)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("contests", func(t *testing.T) {
+		api, err := ContestsInteractor("https://localhost:8888", testUser, testPass, false)
+		assert.Nil(t, err)
+		assert.NotNil(t, api)
+
+		contests, err := api.Contests()
+		assert.Nil(t, contests)
+		assert.NotNil(t, err)
+
+		isX509, err := unwrapsToX509Error(t, err)
+		assert.True(t, isX509)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("problems", func(t *testing.T) {
+		api := interactor(t)
+		api.(*inter).baseUrl = "https://localhost:8888/"
+
+		problems, err := api.Problems()
+		assert.Nil(t, problems)
+		assert.NotNil(t, err)
+
+		isX509, err := unwrapsToX509Error(t, err)
+		assert.True(t, isX509)
+		assert.NotNil(t, err)
+	})
+
+}
+
+func unwrapsToX509Error(t testLogger, err error) (bool, error) {
+	for err != nil {
+		// The following is an exhaustive list of all x509 errors
+		switch err.(type) {
+		case x509.ConstraintViolationError:
+			return true, err
+		case x509.HostnameError:
+			return true, err
+		case x509.SystemRootsError:
+			return true, err
+		case x509.CertificateInvalidError:
+			return true, err
+		case x509.InsecureAlgorithmError:
+			return true, err
+		case x509.UnknownAuthorityError:
+			return true, err
+		}
+
+		t.Logf("Non x509 error found: %v (%T)", err, err)
+		err = errors.Unwrap(err)
+	}
+
+	return false, nil
 }
