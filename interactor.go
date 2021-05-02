@@ -121,11 +121,16 @@ func (i inter) contestPath(path string) string {
 }
 
 func buildClient(username, password string, insecure bool) http.Client {
-	// Create a transport for insecure communication and adding of basic-auth headers
-	transport := http.DefaultTransport
-	if insecure {
-		transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: insecure}
+	// Create a transport for (possibly) insecure communication and adding of basic-auth headers
+	transport := http.DefaultTransport.(*http.Transport)
+	// if insecure {
+	// Check and reuse existing tls config
+	if transport.TLSClientConfig == nil {
+		transport.TLSClientConfig = new(tls.Config)
 	}
+
+	transport.TLSClientConfig.InsecureSkipVerify = insecure
+	// }
 
 	return http.Client{
 		Transport: basicAuthTransport{username, password, transport},
