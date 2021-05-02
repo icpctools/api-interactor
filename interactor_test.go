@@ -205,28 +205,28 @@ func TestSubmissionRetrieval(t *testing.T) {
 func TestJudgementRetrieval(t *testing.T) {
 	api := interactor(t)
 
-	var jtId string
+	var jId string
 	t.Run("all-judgements", func(t *testing.T) {
 		judgements, err := api.Judgements()
 		assert.Nil(t, err)
 		assert.NotNil(t, judgements)
 
-		for _, jt := range judgements {
-			if jt.Id != "" {
-				jtId = jt.Id
+		for _, j := range judgements {
+			if j.Id != "" {
+				jId = j.Id
 				return
 			}
 		}
 	})
 
 	t.Run("single-judgement", func(t *testing.T) {
-		if jtId == "" {
+		if jId == "" {
 			t.Skip("no judgement could be found, retrieving single judgement cannot be tested")
 		}
 
-		jt, err := api.JudgementById(jtId)
+		j, err := api.JudgementById(jId)
 		assert.Nil(t, err)
-		assert.EqualValues(t, jtId, jt.Id)
+		assert.EqualValues(t, jId, j.Id)
 	})
 }
 
