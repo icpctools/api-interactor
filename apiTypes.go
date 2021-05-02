@@ -99,7 +99,7 @@ type (
 		StartContestTime ApiRelTime `json:"start_contest_time"`
 		EndTime          *ApiTime   `json:"end_time,omitempty"`
 		EndContestTime   ApiRelTime `json:"end_contest_time,omitempty"`
-		MaxRunTime       number     `json:"max_run_time,omitempty"`
+		MaxRunTime       float32    `json:"max_run_time,omitempty"`
 	}
 
 	Clarification struct {
