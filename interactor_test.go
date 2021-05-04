@@ -26,6 +26,7 @@ var (
 	testTeamPass = envFallback("TEST_TEAM_PASS", "team")
 	testBase     = envFallback("TEST_BASE", "https://www.domjudge.org/demoweb/api")
 	testContest  = envFallback("TEST_CONTEST", "nwerc18")
+	testProblem  = envFallback("TEST_PROBLEM", "accesspoints")
 
 	testContestWrong = envFallback("TEST_CONTEST_WRONG", "NON_EXISTENT_CONTEST_ID_I_HOPE")
 
@@ -316,7 +317,7 @@ func TestSendClarification(t *testing.T) {
 	t.Run("authorized", func(t *testing.T) {
 		api := interactor(t)
 
-		id, err := api.PostClarification("accesspoints", "testing clarification")
+		id, err := api.PostClarification(testProblem, "testing clarification")
 		assert.Nil(t, err)
 		assert.NotEmpty(t, id)
 
@@ -326,7 +327,7 @@ func TestSendClarification(t *testing.T) {
 	t.Run("authorized-struct", func(t *testing.T) {
 		api := interactor(t)
 		clar := Clarification{
-			ProblemId: "accesspoints",
+			ProblemId: testProblem,
 			Text:      "This is only a test",
 		}
 
@@ -361,7 +362,7 @@ func TestPostSubmission(t *testing.T) {
 		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		goModFile, _ := os.Open("go.mod")
 		_ = sampleSubmission.FromFile(goModFile)
-		id, err := api.PostSubmission("accesspoints", "cpp", "", sampleSubmission)
+		id, err := api.PostSubmission(testProblem, "cpp", "", sampleSubmission)
 		assert.Nil(t, err)
 		assert.NotEmpty(t, id)
 
@@ -373,7 +374,7 @@ func TestPostSubmission(t *testing.T) {
 		var sampleSubmission LocalFileReference
 		_ = sampleSubmission.FromString("sample.cpp", "int main() { return 0; }")
 		submission := Submission{
-			ProblemId:  "accesspoints",
+			ProblemId:  testProblem,
 			LanguageId: "cpp",
 			Time:       new(ApiTime),
 			Files: []FileReference{
