@@ -59,11 +59,13 @@ type (
 	//      non-empty struct.
 
 	Contest struct {
-		Id         string     `json:"id"`
-		Name       string     `json:"name"`
-		FormalName string     `json:"formal_name"`
-		StartTime  ApiTime    `json:"start_time"`
-		Duration   ApiRelTime `json:"duration"`
+		Id                       string     `json:"id"`
+		Name                     string     `json:"name"`
+		FormalName               string     `json:"formal_name,omitempty"`
+		StartTime                ApiTime    `json:"start_time"`
+		Duration                 ApiRelTime `json:"duration"`
+		ScoreboardFreezeDuration ApiRelTime `json:"scoreboard_freeze_duration,omitempty"`
+		CountdownTime            ApiRelTime `json:"countdown_pause_time,omitempty"`
 	}
 
 	Problem struct {
