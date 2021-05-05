@@ -42,6 +42,9 @@ type (
 		Submit(submittable Submittable) (Identifier, error)
 		PostClarification(problemId, text string) (Identifier, error)
 		PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Identifier, error)
+
+		Scoreboard() (Scoreboard, error)
+		State() (State, error)
 	}
 
 	inter struct {

@@ -254,6 +254,36 @@ func (i inter) ClarificationById(clarificationId string) (c Clarification, err e
 	return
 }
 
+func (i inter) Scoreboard() (s Scoreboard, err error) {
+	obj, err := i.GetObject(s, "")
+	if err != nil {
+		return s, fmt.Errorf("could not retrieve scoreboard; %w", err)
+	}
+
+	vv, ok := obj.(Scoreboard)
+	if !ok {
+		return s, fmt.Errorf("unexpected type found, expected scoreboard, got: %T", obj)
+	}
+
+	s = vv
+	return
+}
+
+func (i inter) State() (s State, err error) {
+	obj, err := i.GetObject(s, "")
+	if err != nil {
+		return s, fmt.Errorf("could not retrieve state; %w", err)
+	}
+
+	vv, ok := obj.(State)
+	if !ok {
+		return s, fmt.Errorf("unexpected type found, expected state, got: %T", obj)
+	}
+
+	s = vv
+	return
+}
+
 func (i inter) PostClarification(problemId, text string) (Identifier, error) {
 	return i.postToId(i.contestPath("clarifications"), Clarification{
 		ProblemId: problemId,

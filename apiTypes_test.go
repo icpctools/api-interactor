@@ -20,6 +20,8 @@ var (
 	_ ApiType = Submission{}
 	_ ApiType = Clarification{}
 	_ ApiType = Language{}
+	_ ApiType = Scoreboard{}
+	_ ApiType = State{}
 
 	_ Submittable = Clarification{}
 
