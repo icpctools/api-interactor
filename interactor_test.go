@@ -242,6 +242,24 @@ func TestJudgementRetrieval(t *testing.T) {
 	})
 }
 
+func TestScoreboardRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	sb, err := api.Scoreboard()
+	assert.Nil(t, err)
+
+	t.Log(sb)
+}
+
+func TestStateRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	sb, err := api.State()
+	assert.Nil(t, err)
+
+	t.Log(sb)
+}
+
 func TestLanguageRetrieval(t *testing.T) {
 	api := interactor(t)
 
