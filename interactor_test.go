@@ -118,7 +118,7 @@ func TestContestRetrieval(t *testing.T) {
 
 	t.Run("single-contest", func(t *testing.T) {
 		if contestId == "" {
-			t.Skip("no contest could be found, retrieving single contest cannot be tested")
+			t.Skip("no contests could be found, retrieving single contest cannot be tested")
 		}
 
 		contest, err := api.ContestById(contestId)
@@ -146,7 +146,7 @@ func TestProblemRetrieval(t *testing.T) {
 
 	t.Run("single-problem", func(t *testing.T) {
 		if problemId == "" {
-			t.Skip("no problem could be found, retrieving single problem cannot be tested")
+			t.Skip("no problems could be found, retrieving single problem cannot be tested")
 		}
 
 		problem, err := api.ProblemById(problemId)
@@ -174,7 +174,7 @@ func TestJudgementTypeRetrieval(t *testing.T) {
 
 	t.Run("single-judgement-type", func(t *testing.T) {
 		if jtId == "" {
-			t.Skip("no judgement type could be found, retrieving single judgement type cannot be tested")
+			t.Skip("no judgement types could be found, retrieving single judgement type cannot be tested")
 		}
 
 		jt, err := api.JudgementTypeById(jtId)
@@ -203,7 +203,7 @@ func TestSubmissionRetrieval(t *testing.T) {
 
 	t.Run("single-submissions", func(t *testing.T) {
 		if submissionId == "" {
-			t.Skip("no submission could be found, retrieving single submission cannot be tested")
+			t.Skip("no submissions could be found, retrieving single submission cannot be tested")
 		}
 
 		t.Log(submissionId, testUser, testPass)
@@ -233,12 +233,96 @@ func TestJudgementRetrieval(t *testing.T) {
 
 	t.Run("single-judgement", func(t *testing.T) {
 		if jId == "" {
-			t.Skip("no judgement could be found, retrieving single judgement cannot be tested")
+			t.Skip("no judgements could be found, retrieving single judgement cannot be tested")
 		}
 
 		j, err := api.JudgementById(jId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, jId, j.Id)
+	})
+}
+
+func TestGroupRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	var groupId string
+	t.Run("all-groups", func(t *testing.T) {
+		groups, err := api.Groups()
+		assert.Nil(t, err)
+		assert.NotNil(t, groups)
+
+		for _, group := range groups {
+			if group.Id != "" {
+				groupId = group.Id
+				return
+			}
+		}
+	})
+
+	t.Run("single-group", func(t *testing.T) {
+		if groupId == "" {
+			t.Skip("no groups could be found, retrieving single group cannot be tested")
+		}
+
+		group, err := api.GroupById(groupId)
+		assert.Nil(t, err)
+		assert.EqualValues(t, groupId, group.Id)
+	})
+}
+
+func TestOrganizationRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	var organizationId string
+	t.Run("all-organizations", func(t *testing.T) {
+		organizations, err := api.Organizations()
+		assert.Nil(t, err)
+		assert.NotNil(t, organizations)
+
+		for _, organization := range organizations {
+			if organization.Id != "" {
+				organizationId = organization.Id
+				return
+			}
+		}
+	})
+
+	t.Run("single-organization", func(t *testing.T) {
+		if organizationId == "" {
+			t.Skip("no organizations could be found, retrieving single organization cannot be tested")
+		}
+
+		organization, err := api.OrganizationById(organizationId)
+		assert.Nil(t, err)
+		assert.EqualValues(t, organizationId, organization.Id)
+	})
+}
+
+func TestTeamRetrieval(t *testing.T) {
+	api := interactor(t)
+
+	var teamId string
+	t.Run("all-teams", func(t *testing.T) {
+		teams, err := api.Teams()
+		assert.Nil(t, err)
+		assert.NotNil(t, teams)
+
+		for _, team := range teams {
+			if team.Id != "" {
+				teamId = team.Id
+				return
+			}
+		}
+	})
+
+	t.Run("single-team", func(t *testing.T) {
+		if teamId == "" {
+			t.Skip("no teams could be found, retrieving single team cannot be tested")
+		}
+
+		team, err := api.TeamById(teamId)
+		assert.Nil(t, err)
+		assert.EqualValues(t, teamId, team.Id)
 	})
 }
 
@@ -282,7 +366,7 @@ func TestLanguageRetrieval(t *testing.T) {
 
 	t.Run("single-language", func(t *testing.T) {
 		if languageId == "" {
-			t.Skip("no language could be found, retrieving single language cannot be tested")
+			t.Skip("no languages could be found, retrieving single language cannot be tested")
 		}
 
 		t.Log(languageId, testUser, testPass)
@@ -312,7 +396,7 @@ func TestClarificationRetrieval(t *testing.T) {
 
 	t.Run("single-clarification", func(t *testing.T) {
 		if clarificationId == "" {
-			t.Skip("no clarification could be found, retrieving single clarification cannot be tested")
+			t.Skip("no clarifications could be found, retrieving single clarification cannot be tested")
 		}
 
 		clarification, err := api.ClarificationById(clarificationId)

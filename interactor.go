@@ -36,6 +36,15 @@ type (
 		Languages() ([]Language, error)
 		LanguageById(languageId string) (Language, error)
 
+		Groups() ([]Group, error)
+		GroupById(groupId string) (Group, error)
+
+		Organizations() ([]Organization, error)
+		OrganizationById(organizationId string) (Organization, error)
+
+		Teams() ([]Team, error)
+		TeamById(teamId string) (Team, error)
+
 		GetObject(interactor ApiType, id string) (ApiType, error)
 		GetObjects(interactor ApiType) ([]ApiType, error)
 

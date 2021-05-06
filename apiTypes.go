@@ -87,14 +87,14 @@ type (
 	}
 
 	JudgementType struct {
-		Id      string `json:"id,omitempty"`
+		Id      string `json:"id"`
 		Name    string `json:"name"`
 		Penalty bool   `json:"penalty,omitempty"`
 		Solved  bool   `json:"solved"`
 	}
 
 	Judgement struct {
-		Id               string     `json:"id,omitempty"`
+		Id               string     `json:"id"`
 		SubmissionId     string     `json:"submission_id"`
 		JudgementTypeId  string     `json:"judgement_type_id,omitempty"`
 		StartTime        *ApiTime   `json:"start_time"`
@@ -109,18 +109,45 @@ type (
 		FromTeamId  string     `json:"from_team_id,omitempty"`
 		ToTeamId    string     `json:"to_team_id,omitempty"`
 		ReplyToId   string     `json:"reply_to_id,omitempty"`
-		ProblemId   string     `json:"problem_id"`
+		ProblemId   string     `json:"problem_id,omitempty"`
 		Text        string     `json:"text"`
 		Time        *ApiTime   `json:"time,omitempty"`
 		ContestTime ApiRelTime `json:"contest_time,omitempty"`
 	}
 
 	Language struct {
-		Id                 string   `json:"id,omitempty"`
-		Name               string   `json:"name,omitempty"`
+		Id                 string   `json:"id"`
+		Name               string   `json:"name"`
 		EntryPointRequired bool     `json:"entry_point_required"`
 		EntryPointName     string   `json:"entry_point_name,omitempty"`
 		Extensions         []string `json:"extensions"`
+	}
+
+	Group struct {
+		Id     string `json:"id"`
+		ICPCId string `json:"icpc_id"`
+		Name   string `json:"name"`
+		Type   string `json:"type"`
+		Hidden bool   `json:"hidden"`
+	}
+
+	Organization struct {
+		Id             string `json:"id"`
+		ICPCId         string `json:"icpc_id"`
+		Name           string `json:"name"`
+		FormalName     string `json:"formal_name"`
+		Country        string `json:"country"`
+		URL            string `json:"url"`
+		TwitterHashtag string `json:"twitter_hashtag"`
+	}
+
+	Team struct {
+		Id             string   `json:"id"`
+		ICPCId         string   `json:"icpc_id"`
+		Name           string   `json:"name"`
+		DisplayName    string   `json:"display_name"`
+		GroupIds       []string `json:"group_ids"`
+		OrganizationId string   `json:"organization_id"`
 	}
 
 	Identifier string
@@ -270,6 +297,89 @@ func (j Judgement) String() string {
 start contest time: %v
   end contest time: %v
 `, j.Id, j.SubmissionId, j.JudgementTypeId, j.StartContestTime, j.EndContestTime)
+}
+
+// -- Group implementation
+
+func (g Group) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &g)
+	return g, err
+}
+
+func (g Group) InContest() bool {
+	return true
+}
+
+func (g Group) Path() string {
+	return "groups"
+}
+
+func (g Group) Generate() ApiType {
+	return Group{}
+}
+
+func (g Group) String() string {
+	return fmt.Sprintf(`
+    id: %v
+  name: %v
+  type: %v
+hidden: %v
+`, g.Id, g.Name, g.Type, g.Hidden)
+}
+
+// -- Organization implementation
+
+func (o Organization) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &o)
+	return o, err
+}
+
+func (o Organization) InContest() bool {
+	return true
+}
+
+func (o Organization) Path() string {
+	return "organizations"
+}
+
+func (o Organization) Generate() ApiType {
+	return Organization{}
+}
+
+func (o Organization) String() string {
+	return fmt.Sprintf(`
+         id: %v
+       name: %v
+formal name: %v
+    country: %v
+`, o.Id, o.Name, o.FormalName, o.Country)
+}
+
+// -- Team implementation
+
+func (t Team) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &t)
+	return t, err
+}
+
+func (t Team) InContest() bool {
+	return true
+}
+
+func (t Team) Path() string {
+	return "teams"
+}
+
+func (t Team) Generate() ApiType {
+	return Team{}
+}
+
+func (t Team) String() string {
+	return fmt.Sprintf(`
+          id: %v
+        name: %v
+display name: %v
+`, t.Id, t.Name, t.DisplayName)
 }
 
 // -- Clarification implementation
