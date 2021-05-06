@@ -254,6 +254,111 @@ func (i inter) ClarificationById(clarificationId string) (c Clarification, err e
 	return
 }
 
+func (i inter) Groups() ([]Group, error) {
+	obj, err := i.GetObjects(Group{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve groups; %w", err)
+	}
+
+	// obj should be a slice of Group, cast to it to slice of Group
+	ret := make([]Group, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Group)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected group, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) GroupById(groupId string) (g Group, err error) {
+	obj, err := i.GetObject(g, groupId)
+	if err != nil {
+		return g, fmt.Errorf("could not retrieve group; %w", err)
+	}
+
+	vv, ok := obj.(Group)
+	if !ok {
+		return g, fmt.Errorf("unexpected type found, expected group, got: %T", obj)
+	}
+
+	g = vv
+	return
+}
+
+func (i inter) Organizations() ([]Organization, error) {
+	obj, err := i.GetObjects(Organization{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve organizations; %w", err)
+	}
+
+	// obj should be a slice of Organization, cast to it to slice of Organization
+	ret := make([]Organization, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Organization)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected organization, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) OrganizationById(organizationId string) (o Organization, err error) {
+	obj, err := i.GetObject(o, organizationId)
+	if err != nil {
+		return o, fmt.Errorf("could not retrieve organization; %w", err)
+	}
+
+	vv, ok := obj.(Organization)
+	if !ok {
+		return o, fmt.Errorf("unexpected type found, expected organization, got: %T", obj)
+	}
+
+	o = vv
+	return
+}
+
+func (i inter) Teams() ([]Team, error) {
+	obj, err := i.GetObjects(Team{})
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve teams; %w", err)
+	}
+
+	// obj should be a slice of Team, cast to it to slice of Team
+	ret := make([]Team, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Team)
+		if !ok {
+			return ret, fmt.Errorf("unexpected type found, expected team, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) TeamById(teamId string) (t Team, err error) {
+	obj, err := i.GetObject(t, teamId)
+	if err != nil {
+		return t, fmt.Errorf("could not retrieve team; %w", err)
+	}
+
+	vv, ok := obj.(Team)
+	if !ok {
+		return t, fmt.Errorf("unexpected type found, expected team, got: %T", obj)
+	}
+
+	t = vv
+	return
+}
+
 func (i inter) Scoreboard() (s Scoreboard, err error) {
 	obj, err := i.GetObject(s, "")
 	if err != nil {
