@@ -48,9 +48,9 @@ type (
 		GetObject(interactor ApiType, id string) (ApiType, error)
 		GetObjects(interactor ApiType) ([]ApiType, error)
 
-		Submit(submittable Submittable) (Identifier, error)
-		PostClarification(problemId, text string) (Identifier, error)
-		PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Identifier, error)
+		Submit(submittable Submittable) (ApiType, error)
+		PostClarification(problemId, text string) (Clarification, error)
+		PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Submission, error)
 
 		Scoreboard() (Scoreboard, error)
 		State() (State, error)

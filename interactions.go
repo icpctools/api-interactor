@@ -29,19 +29,18 @@ func (i inter) Contests() ([]Contest, error) {
 }
 
 func (i inter) ContestById(contestId string) (c Contest, err error) {
-	// Retrieve all contests and check whether the contest exists, TODO decide on whether to optimize
-	contests, err := i.Contests()
+	obj, err := i.GetObject(c, contestId)
 	if err != nil {
 		return c, fmt.Errorf("could not retrieve contest; %w", err)
 	}
 
-	for _, v := range contests {
-		if v.Id == contestId {
-			return v, nil
-		}
+	vv, ok := obj.(Contest)
+	if !ok {
+		return c, fmt.Errorf("unexpected type found, expected contest, got: %T", obj)
 	}
 
-	return c, errNotFound
+	c = vv
+	return
 }
 
 func (i inter) Problems() ([]Problem, error) {
@@ -389,15 +388,26 @@ func (i inter) State() (s State, err error) {
 	return
 }
 
-func (i inter) PostClarification(problemId, text string) (Identifier, error) {
-	return i.postToId(i.contestPath("clarifications"), Clarification{
+func (i inter) PostClarification(problemId, text string) (c Clarification, err error) {
+	obj, err := i.post(c, Clarification{
 		ProblemId: problemId,
 		Text:      text,
 	})
+	if err != nil {
+		return c, fmt.Errorf("could not post clarification; %w", err)
+	}
+
+	vv, ok := obj.(Clarification)
+	if !ok {
+		return c, fmt.Errorf("unexpected type found, expected clarification, got: %T", obj)
+	}
+
+	c = vv
+	return
 }
 
-func (i inter) PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Identifier, error) {
-	return i.postToId(i.contestPath("submissions"), Submission{
+func (i inter) PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (s Submission, err error) {
+	obj, err := i.post(s, Submission{
 		ProblemId:  problemId,
 		LanguageId: languageId,
 		EntryPoint: entrypoint,
@@ -408,10 +418,21 @@ func (i inter) PostSubmission(problemId, languageId, entrypoint string, files Lo
 			},
 		},
 	})
+	if err != nil {
+		return s, fmt.Errorf("could not post submission; %w", err)
+	}
+
+	vv, ok := obj.(Submission)
+	if !ok {
+		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj)
+	}
+
+	s = vv
+	return
 }
 
-func (i inter) Submit(s Submittable) (Identifier, error) {
-	return i.postToId(i.contestPath(s.Path()), s)
+func (i inter) Submit(s Submittable) (ApiType, error) {
+	return i.post(s, s)
 }
 
 func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
@@ -454,7 +475,7 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 		return nil, err
 	}
 
-	// If id is not empty, only a single instance is expected to be returned
+	// If single is true, only a single instance is expected to be returned
 	if single {
 		bts, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -489,28 +510,32 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 	return ret, nil
 }
 
-func (i inter) postToId(path string, encodableBody Submittable) (Identifier, error) {
-	var returnedId Identifier
-
+func (i inter) post(interactor ApiType, encodableBody Submittable) (ApiType, error) {
 	var buf = new(bytes.Buffer)
 	err := json.NewEncoder(buf).Encode(encodableBody)
 	if err != nil {
-		return returnedId, fmt.Errorf("could not marshal body; %w", err)
+		return nil, fmt.Errorf("could not marshal body; %w", err)
 	}
 
 	// Post the body
-	resp, err := i.Post(i.baseUrl+path, "application/json", buf)
+	resp, err := i.Post(i.baseUrl+i.toPath(interactor), "application/json", buf)
 	if err != nil {
-		return returnedId, fmt.Errorf("could not post request; %w", err)
+		return nil, fmt.Errorf("could not post request; %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	if err := responseToError(resp); err != nil {
-		return returnedId, err
+		return nil, err
 	}
 
-	return returnedId, json.NewDecoder(resp.Body).Decode(&returnedId)
+	bts, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("could not read entire body; %w", err)
+	}
+
+	in, err := interactor.FromJSON(bts)
+	return in, err
 }
 
 func responseToError(r *http.Response) error {

@@ -403,6 +403,7 @@ func (c Clarification) Generate() ApiType {
 
 func (c Clarification) String() string {
 	return fmt.Sprintf(`
+           id: %v
  from team id: %v
    to team id: %v
   reply to id: %v
@@ -410,7 +411,7 @@ func (c Clarification) String() string {
          text: %v
          time: %v
  contest time: %v
-`, c.FromTeamId, c.ToTeamId, c.ReplyToId, c.ProblemId, c.Text, c.Time, c.ContestTime)
+`, c.Id, c.FromTeamId, c.ToTeamId, c.ReplyToId, c.ProblemId, c.Text, c.Time, c.ContestTime)
 }
 
 // -- Language implementation
