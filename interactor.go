@@ -124,14 +124,6 @@ func (i *inter) ToContest(cid string) (ContestApi, error) {
 	return i, nil
 }
 
-func (i inter) contestPath(path string) string {
-	if i.contestId != "" {
-		return fmt.Sprintf("contests/%s/%s", i.contestId, path)
-	}
-
-	return path
-}
-
 func buildClient(username, password string, insecure bool) http.Client {
 	// Create a transport for (possibly) insecure communication and adding of basic-auth headers
 	transport := http.DefaultTransport.(*http.Transport)
