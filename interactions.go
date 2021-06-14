@@ -436,7 +436,7 @@ func (i inter) Submit(s Submittable) (ApiType, error) {
 }
 
 func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
-	objs, err := i.retrieve(interactor, i.toPath(interactor)+id, true)
+	objs, err := i.retrieve(interactor, i.toPath(interactor)+"/"+id, true)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve; %w", err)
@@ -455,7 +455,7 @@ func (i inter) toPath(interactor ApiType) string {
 		base = "contests/" + i.contestId + "/"
 	}
 
-	return base + interactor.Path() + "/"
+	return base + interactor.Path()
 }
 
 func (i inter) GetObjects(interactor ApiType) ([]ApiType, error) {
