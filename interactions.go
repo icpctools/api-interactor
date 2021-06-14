@@ -554,8 +554,14 @@ func responseToError(r *http.Response) error {
 	// Read the contents
 	bts, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return fmt.Errorf("API error encountered (%v), furthermore an error was encountered while reading the response: %w", statusErr, err)
+		return fmt.Errorf("API error (%v), could not read response body: %w", statusErr, err)
 	}
 
-	return fmt.Errorf("API error '%s' (%w)", bts, statusErr)
+	var e Error
+	err = json.Unmarshal(bts, &e)
+	if err != nil {
+		return fmt.Errorf("API error (%v), couldn't parse details: %w", statusErr, err)
+	}
+
+	return fmt.Errorf("%s (error code %d)", e.Message, e.Code)
 }
