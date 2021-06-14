@@ -151,6 +151,11 @@ type (
 	}
 
 	Identifier string
+
+	Error struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
 )
 
 // -- Contest implementation
