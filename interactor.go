@@ -18,6 +18,8 @@ type (
 	ContestApi interface {
 		ContestsApi
 
+		Contest() (Contest, error)
+
 		Problems() ([]Problem, error)
 		ProblemById(problemId string) (Problem, error)
 
@@ -73,8 +75,11 @@ type (
 )
 
 var (
-	errUnauthorized = errors.New("request not authorized")
-	errNotFound     = errors.New("object not found")
+	errBadRequest   = errors.New("bad request")            // 400
+	errUnauthorized = errors.New("request not authorized") // 401
+	errForbidden    = errors.New("forbidden")              // 403
+	errNotFound     = errors.New("object not found")       // 404
+	errConflict     = errors.New("conflict")               // 409
 )
 
 // RoundTrip adds the basic auth headers
@@ -118,7 +123,7 @@ func (i *inter) ToContest(cid string) (ContestApi, error) {
 	i.contestId = cid
 
 	if _, err := i.ContestById(cid); err != nil {
-		return nil, fmt.Errorf("contest could not be found; %w", err)
+		return nil, fmt.Errorf("could not find contest; %w", err)
 	}
 
 	return i, nil
