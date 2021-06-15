@@ -11,7 +11,7 @@ import (
 func (i inter) Contests() ([]Contest, error) {
 	obj, err := i.GetObjects(Contest{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve contests; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Contest, cast to it to slice of Contest
@@ -19,7 +19,7 @@ func (i inter) Contests() ([]Contest, error) {
 	for k, v := range obj {
 		vv, ok := v.(Contest)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected contest, got: %T", v)
+			return ret, fmt.Errorf("expected contest, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -31,22 +31,26 @@ func (i inter) Contests() ([]Contest, error) {
 func (i inter) ContestById(contestId string) (c Contest, err error) {
 	obj, err := i.GetObject(c, contestId)
 	if err != nil {
-		return c, fmt.Errorf("could not retrieve contest; %w", err)
+		return c, err
 	}
 
 	vv, ok := obj.(Contest)
 	if !ok {
-		return c, fmt.Errorf("unexpected type found, expected contest, got: %T", obj)
+		return c, fmt.Errorf("expected contest, got: %T", obj)
 	}
 
 	c = vv
 	return
 }
 
+func (i inter) Contest() (c Contest, err error) {
+	return i.ContestById(i.contestId)
+}
+
 func (i inter) Problems() ([]Problem, error) {
 	obj, err := i.GetObjects(Problem{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve problems; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Problem, cast to it to slice of Problem
@@ -54,7 +58,7 @@ func (i inter) Problems() ([]Problem, error) {
 	for k, v := range obj {
 		vv, ok := v.(Problem)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected problem, got: %T", v)
+			return ret, fmt.Errorf("expected problem, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -66,12 +70,12 @@ func (i inter) Problems() ([]Problem, error) {
 func (i inter) ProblemById(problemId string) (p Problem, err error) {
 	obj, err := i.GetObject(p, problemId)
 	if err != nil {
-		return p, fmt.Errorf("could not retrieve problem; %w", err)
+		return p, err
 	}
 
 	vv, ok := obj.(Problem)
 	if !ok {
-		return p, fmt.Errorf("unexpected type found, expected problem, got: %T", obj)
+		return p, fmt.Errorf("expected problem, got: %T", obj)
 	}
 
 	p = vv
@@ -81,7 +85,7 @@ func (i inter) ProblemById(problemId string) (p Problem, err error) {
 func (i inter) Submissions() ([]Submission, error) {
 	obj, err := i.GetObjects(Submission{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve submissions; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Submission, cast to it to slice of Submission
@@ -89,7 +93,7 @@ func (i inter) Submissions() ([]Submission, error) {
 	for k, v := range obj {
 		vv, ok := v.(Submission)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected submission, got: %T", v)
+			return ret, fmt.Errorf("expected submission, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -101,12 +105,12 @@ func (i inter) Submissions() ([]Submission, error) {
 func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
 	obj, err := i.GetObject(s, submissionId)
 	if err != nil {
-		return s, fmt.Errorf("could not retrieve submission; %w", err)
+		return s, err
 	}
 
 	vv, ok := obj.(Submission)
 	if !ok {
-		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj)
+		return s, fmt.Errorf("expected submission, got: %T", obj)
 	}
 
 	s = vv
@@ -116,7 +120,7 @@ func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
 func (i inter) Languages() ([]Language, error) {
 	obj, err := i.GetObjects(Language{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve languages; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Language, cast to it to slice of Language
@@ -124,7 +128,7 @@ func (i inter) Languages() ([]Language, error) {
 	for k, v := range obj {
 		vv, ok := v.(Language)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected language, got: %T", v)
+			return ret, fmt.Errorf("expected language, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -136,12 +140,12 @@ func (i inter) Languages() ([]Language, error) {
 func (i inter) LanguageById(languageId string) (l Language, err error) {
 	obj, err := i.GetObject(l, languageId)
 	if err != nil {
-		return l, fmt.Errorf("could not retrieve language; %w", err)
+		return l, err
 	}
 
 	vv, ok := obj.(Language)
 	if !ok {
-		return l, fmt.Errorf("unexpected type found, expected language, got: %T", obj)
+		return l, fmt.Errorf("expected language, got: %T", obj)
 	}
 
 	l = vv
@@ -151,7 +155,7 @@ func (i inter) LanguageById(languageId string) (l Language, err error) {
 func (i inter) JudgementTypes() ([]JudgementType, error) {
 	obj, err := i.GetObjects(JudgementType{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve judgement types; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of JudgementType, cast to it to slice of JudgementType
@@ -159,7 +163,7 @@ func (i inter) JudgementTypes() ([]JudgementType, error) {
 	for k, v := range obj {
 		vv, ok := v.(JudgementType)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected judgement type, got: %T", v)
+			return ret, fmt.Errorf("expected judgement type, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -171,12 +175,12 @@ func (i inter) JudgementTypes() ([]JudgementType, error) {
 func (i inter) JudgementTypeById(judgementTypeId string) (jt JudgementType, err error) {
 	obj, err := i.GetObject(jt, judgementTypeId)
 	if err != nil {
-		return jt, fmt.Errorf("could not retrieve judgement type; %w", err)
+		return jt, err
 	}
 
 	vv, ok := obj.(JudgementType)
 	if !ok {
-		return jt, fmt.Errorf("unexpected type found, expected judgement type, got: %T", obj)
+		return jt, fmt.Errorf("judgement type, got: %T", obj)
 	}
 
 	jt = vv
@@ -186,7 +190,7 @@ func (i inter) JudgementTypeById(judgementTypeId string) (jt JudgementType, err 
 func (i inter) Judgements() ([]Judgement, error) {
 	obj, err := i.GetObjects(Judgement{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve judgements; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Judgement, cast to it to slice of Judgement
@@ -194,7 +198,7 @@ func (i inter) Judgements() ([]Judgement, error) {
 	for k, v := range obj {
 		vv, ok := v.(Judgement)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected judgement, got: %T", v)
+			return ret, fmt.Errorf("expected judgement, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -206,12 +210,12 @@ func (i inter) Judgements() ([]Judgement, error) {
 func (i inter) JudgementById(judgementId string) (j Judgement, err error) {
 	obj, err := i.GetObject(j, judgementId)
 	if err != nil {
-		return j, fmt.Errorf("could not retrieve judgement; %w", err)
+		return j, err
 	}
 
 	vv, ok := obj.(Judgement)
 	if !ok {
-		return j, fmt.Errorf("unexpected type found, expected judgement, got: %T", obj)
+		return j, fmt.Errorf("expected judgement, got: %T", obj)
 	}
 
 	j = vv
@@ -221,7 +225,7 @@ func (i inter) JudgementById(judgementId string) (j Judgement, err error) {
 func (i inter) Clarifications() ([]Clarification, error) {
 	obj, err := i.GetObjects(Clarification{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve clarifications; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Clarification, cast to it to slice of Clarification
@@ -229,7 +233,7 @@ func (i inter) Clarifications() ([]Clarification, error) {
 	for k, v := range obj {
 		vv, ok := v.(Clarification)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected clarification, got: %T", v)
+			return ret, fmt.Errorf("expected clarification, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -241,12 +245,12 @@ func (i inter) Clarifications() ([]Clarification, error) {
 func (i inter) ClarificationById(clarificationId string) (c Clarification, err error) {
 	obj, err := i.GetObject(c, clarificationId)
 	if err != nil {
-		return c, fmt.Errorf("could not retrieve clarification; %w", err)
+		return c, err
 	}
 
 	vv, ok := obj.(Clarification)
 	if !ok {
-		return c, fmt.Errorf("unexpected type found, expected clarification, got: %T", obj)
+		return c, fmt.Errorf("expected clarification, got: %T", obj)
 	}
 
 	c = vv
@@ -256,7 +260,7 @@ func (i inter) ClarificationById(clarificationId string) (c Clarification, err e
 func (i inter) Groups() ([]Group, error) {
 	obj, err := i.GetObjects(Group{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve groups; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Group, cast to it to slice of Group
@@ -264,7 +268,7 @@ func (i inter) Groups() ([]Group, error) {
 	for k, v := range obj {
 		vv, ok := v.(Group)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected group, got: %T", v)
+			return ret, fmt.Errorf("expected group, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -276,12 +280,12 @@ func (i inter) Groups() ([]Group, error) {
 func (i inter) GroupById(groupId string) (g Group, err error) {
 	obj, err := i.GetObject(g, groupId)
 	if err != nil {
-		return g, fmt.Errorf("could not retrieve group; %w", err)
+		return g, err
 	}
 
 	vv, ok := obj.(Group)
 	if !ok {
-		return g, fmt.Errorf("unexpected type found, expected group, got: %T", obj)
+		return g, fmt.Errorf("expected group, got: %T", obj)
 	}
 
 	g = vv
@@ -291,7 +295,7 @@ func (i inter) GroupById(groupId string) (g Group, err error) {
 func (i inter) Organizations() ([]Organization, error) {
 	obj, err := i.GetObjects(Organization{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve organizations; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Organization, cast to it to slice of Organization
@@ -299,7 +303,7 @@ func (i inter) Organizations() ([]Organization, error) {
 	for k, v := range obj {
 		vv, ok := v.(Organization)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected organization, got: %T", v)
+			return ret, fmt.Errorf("expected organization, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -311,12 +315,12 @@ func (i inter) Organizations() ([]Organization, error) {
 func (i inter) OrganizationById(organizationId string) (o Organization, err error) {
 	obj, err := i.GetObject(o, organizationId)
 	if err != nil {
-		return o, fmt.Errorf("could not retrieve organization; %w", err)
+		return o, err
 	}
 
 	vv, ok := obj.(Organization)
 	if !ok {
-		return o, fmt.Errorf("unexpected type found, expected organization, got: %T", obj)
+		return o, fmt.Errorf("expected organization, got: %T", obj)
 	}
 
 	o = vv
@@ -326,7 +330,7 @@ func (i inter) OrganizationById(organizationId string) (o Organization, err erro
 func (i inter) Teams() ([]Team, error) {
 	obj, err := i.GetObjects(Team{})
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve teams; %w", err)
+		return nil, err
 	}
 
 	// obj should be a slice of Team, cast to it to slice of Team
@@ -334,7 +338,7 @@ func (i inter) Teams() ([]Team, error) {
 	for k, v := range obj {
 		vv, ok := v.(Team)
 		if !ok {
-			return ret, fmt.Errorf("unexpected type found, expected team, got: %T", v)
+			return ret, fmt.Errorf("expected team, got: %T", v)
 		}
 
 		ret[k] = vv
@@ -346,12 +350,12 @@ func (i inter) Teams() ([]Team, error) {
 func (i inter) TeamById(teamId string) (t Team, err error) {
 	obj, err := i.GetObject(t, teamId)
 	if err != nil {
-		return t, fmt.Errorf("could not retrieve team; %w", err)
+		return t, err
 	}
 
 	vv, ok := obj.(Team)
 	if !ok {
-		return t, fmt.Errorf("unexpected type found, expected team, got: %T", obj)
+		return t, fmt.Errorf("expected team, got: %T", obj)
 	}
 
 	t = vv
@@ -361,12 +365,12 @@ func (i inter) TeamById(teamId string) (t Team, err error) {
 func (i inter) Scoreboard() (s Scoreboard, err error) {
 	obj, err := i.GetObject(s, "")
 	if err != nil {
-		return s, fmt.Errorf("could not retrieve scoreboard; %w", err)
+		return s, err
 	}
 
 	vv, ok := obj.(Scoreboard)
 	if !ok {
-		return s, fmt.Errorf("unexpected type found, expected scoreboard, got: %T", obj)
+		return s, fmt.Errorf("expected scoreboard, got: %T", obj)
 	}
 
 	s = vv
@@ -376,12 +380,12 @@ func (i inter) Scoreboard() (s Scoreboard, err error) {
 func (i inter) State() (s State, err error) {
 	obj, err := i.GetObject(s, "")
 	if err != nil {
-		return s, fmt.Errorf("could not retrieve state; %w", err)
+		return s, err
 	}
 
 	vv, ok := obj.(State)
 	if !ok {
-		return s, fmt.Errorf("unexpected type found, expected state, got: %T", obj)
+		return s, fmt.Errorf("expected state, got: %T", obj)
 	}
 
 	s = vv
@@ -394,12 +398,12 @@ func (i inter) PostClarification(problemId, text string) (c Clarification, err e
 		Text:      text,
 	})
 	if err != nil {
-		return c, fmt.Errorf("could not post clarification; %w", err)
+		return c, err
 	}
 
 	vv, ok := obj.(Clarification)
 	if !ok {
-		return c, fmt.Errorf("unexpected type found, expected clarification, got: %T", obj)
+		return c, fmt.Errorf("expected clarification, got: %T", obj)
 	}
 
 	c = vv
@@ -419,12 +423,12 @@ func (i inter) PostSubmission(problemId, languageId, entrypoint string, files Lo
 		},
 	})
 	if err != nil {
-		return s, fmt.Errorf("could not post submission; %w", err)
+		return s, err
 	}
 
 	vv, ok := obj.(Submission)
 	if !ok {
-		return s, fmt.Errorf("unexpected type found, expected submission, got: %T", obj)
+		return s, fmt.Errorf("expected submission, got: %T", obj)
 	}
 
 	s = vv
@@ -439,11 +443,11 @@ func (i inter) GetObject(interactor ApiType, id string) (ApiType, error) {
 	objs, err := i.retrieve(interactor, i.toPath(interactor)+"/"+id, true)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve; %w", err)
+		return nil, err
 	}
 
 	if len(objs) != 1 {
-		return nil, fmt.Errorf("incorrect number of objects found, expected 1, got: %v", len(objs))
+		return nil, fmt.Errorf("expected 1 object, got: %v", len(objs))
 	}
 
 	return objs[0], nil
@@ -479,7 +483,7 @@ func (i inter) retrieve(interactor ApiType, path string, single bool) ([]ApiType
 	if single {
 		bts, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("could not read entire body; %w", err)
+			return nil, fmt.Errorf("could not read response body; %w", err)
 		}
 
 		in, err := interactor.FromJSON(bts)
@@ -520,7 +524,7 @@ func (i inter) post(interactor ApiType, encodableBody Submittable) (ApiType, err
 	// Post the body
 	resp, err := i.Post(i.baseUrl+i.toPath(interactor), "application/json", buf)
 	if err != nil {
-		return nil, fmt.Errorf("could not post request; %w", err)
+		return nil, err
 	}
 
 	defer resp.Body.Close()
@@ -531,11 +535,10 @@ func (i inter) post(interactor ApiType, encodableBody Submittable) (ApiType, err
 
 	bts, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("could not read entire body; %w", err)
+		return nil, fmt.Errorf("could not read response body; %w", err)
 	}
 
-	in, err := interactor.FromJSON(bts)
-	return in, err
+	return interactor.FromJSON(bts)
 }
 
 func responseToError(r *http.Response) error {
@@ -543,10 +546,16 @@ func responseToError(r *http.Response) error {
 	switch r.StatusCode {
 	case http.StatusOK:
 		return statusErr
+	case http.StatusBadRequest:
+		statusErr = errBadRequest
 	case http.StatusUnauthorized:
 		statusErr = errUnauthorized
+	case http.StatusForbidden:
+		statusErr = errForbidden
 	case http.StatusNotFound:
 		statusErr = errNotFound
+	case http.StatusConflict:
+		statusErr = errConflict
 	default:
 		statusErr = fmt.Errorf("invalid statuscode received: %d", r.StatusCode)
 	}
