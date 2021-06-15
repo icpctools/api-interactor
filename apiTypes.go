@@ -524,7 +524,24 @@ func (a *ApiRelTime) UnmarshalJSON(b []byte) (err error) {
 // -- ApiRelTime implementation
 
 func (a ApiRelTime) String() string {
-	return time.Duration(a).String()
+	var h = int64(time.Duration(a).Hours())
+	var m = int64(time.Duration(a).Minutes())
+	var s = int64(time.Duration(a).Seconds())
+	s -= m * 60
+	m -= h * 60
+
+	var t = ""
+	if h != 0 {
+		t = fmt.Sprintf("%dh", h)
+	}
+	if m != 0 {
+		t += fmt.Sprintf("%dm", m)
+	}
+	if s != 0 {
+		t += fmt.Sprintf("%ds", s)
+	}
+
+	return t
 }
 
 func (a ApiRelTime) Duration() time.Duration {
@@ -536,7 +553,13 @@ func (a ApiTime) Time() time.Time {
 }
 
 func (a ApiTime) String() string {
-	return time.Time(a).String()
+	var now = time.Now()
+	var tt = time.Time(a)
+	if tt.Year() == now.Year() && tt.Month() == now.Month() && tt.Day() == now.Day() {
+		return tt.Format("3:04:05pm today")
+	} else {
+		return tt.Format("3:04:05pm on January 2, 2006")
+	}
 }
 
 func (a ApiTime) Before(b ApiTime) bool {
