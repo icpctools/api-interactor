@@ -6,7 +6,7 @@ jobs:
     - name: repo-sync
       uses: wei/git-sync@v2
       with:
-        source_repo: "https://${{ secrets.githubAuth }}@github.com/tuupke/api-interactor.git"
+        source_repo: "https://${{ secrets.githubAuth }}@github.com/icpctools/api-interactor.git"
         source_branch: "refs/remotes/source/*"
-        destination_repo: "https://${{ secrets.gitlabAuth }}@gitlab.com/nickygerritsen/api-interactor.git"
+        destination_repo: "https://${{ secrets.gitlabAuth }}@gitlab.com/icpctools/api-interactor.git"
         destination_branch: "refs/heads/*"
