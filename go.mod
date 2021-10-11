@@ -1,4 +1,4 @@
-module github.com/tuupke/api-interactor
+module github.com/icpctools/api-interactor
 
 go 1.16
 
