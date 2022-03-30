@@ -20,27 +20,16 @@ type (
 
 		Contest() (Contest, error)
 
-		Accounts() ([]Account, error)
-		AccountById(accountId string) (Account, error)
-		Account() (Account, error)
-
-		Problems() ([]Problem, error)
-		ProblemById(problemId string) (Problem, error)
+		State() (State, error)
 
 		JudgementTypes() ([]JudgementType, error)
 		JudgementTypeById(judgementTypeId string) (JudgementType, error)
 
-		Submissions() ([]Submission, error)
-		SubmissionById(submissionId string) (Submission, error)
-
-		Judgements() ([]Judgement, error)
-		JudgementById(judgementId string) (Judgement, error)
-
-		Clarifications() ([]Clarification, error)
-		ClarificationById(clarificationId string) (Clarification, error)
-
 		Languages() ([]Language, error)
 		LanguageById(languageId string) (Language, error)
+
+		Problems() ([]Problem, error)
+		ProblemById(problemId string) (Problem, error)
 
 		Groups() ([]Group, error)
 		GroupById(groupId string) (Group, error)
@@ -51,15 +40,30 @@ type (
 		Teams() ([]Team, error)
 		TeamById(teamId string) (Team, error)
 
-		GetObject(interactor ApiType, id string) (ApiType, error)
-		GetObjects(interactor ApiType) ([]ApiType, error)
+		Persons() ([]Person, error)
+		PersonById(personId string) (Person, error)
+
+		Accounts() ([]Account, error)
+		AccountById(accountId string) (Account, error)
+		Account() (Account, error)
+
+		Submissions() ([]Submission, error)
+		SubmissionById(submissionId string) (Submission, error)
+
+		Judgements() ([]Judgement, error)
+		JudgementById(judgementId string) (Judgement, error)
+
+		Clarifications() ([]Clarification, error)
+		ClarificationById(clarificationId string) (Clarification, error)
+
+		Scoreboard() (Scoreboard, error)
 
 		Submit(submittable Submittable) (ApiType, error)
 		PostClarification(problemId, text string) (Clarification, error)
 		PostSubmission(problemId, languageId, entrypoint string, files LocalFileReference) (Submission, error)
 
-		Scoreboard() (Scoreboard, error)
-		State() (State, error)
+		GetObject(interactor ApiType, id string) (ApiType, error)
+		GetObjects(interactor ApiType) ([]ApiType, error)
 	}
 
 	inter struct {

@@ -150,12 +150,24 @@ type (
 		OrganizationId string   `json:"organization_id"`
 	}
 
+	Person struct {
+		Id     string `json:"id"`
+		ICPCId string `json:"icpc_id,omitempty"`
+		Name   string `json:"name"`
+		Title  string `json:"title,omitempty"`
+		Email  string `json:"email,omitempty"`
+		Sex    string `json:"sex,omitempty"`
+		Role   string `json:"role,omitempty"`
+		TeamId string `json:"team_id,omitempty"`
+	}
+
 	Account struct {
 		Id       string `json:"id"`
 		Username string `json:"username"`
 		Type     string `json:"type,omitempty"`
 		Ip       string `json:"ip,omitempty"`
 		TeamId   string `json:"team_id,omitempty"`
+		PersonId string `json:"person_id,omitempty"`
 	}
 
 	Identifier string
@@ -456,6 +468,37 @@ func (l Language) String() string {
 `, l.Id, l.Name, l.EntryPointRequired, l.EntryPointName, l.Extensions)
 }
 
+// -- Person implementation
+
+func (p Person) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &p)
+	return p, err
+}
+
+func (p Person) InContest() bool {
+	return true
+}
+
+func (p Person) Path() string {
+	return "persons"
+}
+
+func (p Person) Generate() ApiType {
+	return Person{}
+}
+
+func (p Person) String() string {
+	return fmt.Sprintf(`
+      id: %v
+  	name: %v
+   title: %v
+   email: %v
+     sex: %v
+ 	role: %v
+ team_id: %v
+`, p.Id, p.Name, p.Title, p.Email, p.Sex, p.Role, p.TeamId)
+}
+
 // -- Account implementation
 
 func (a Account) FromJSON(data []byte) (ApiType, error) {
@@ -482,7 +525,8 @@ func (a Account) String() string {
       type: %v
         ip: %v
    team id: %v
-`, a.Id, a.Username, a.Type, a.Ip, a.TeamId)
+ person id: %v
+`, a.Id, a.Username, a.Type, a.Ip, a.TeamId, a.PersonId)
 }
 
 // -- ApiTime implementation
