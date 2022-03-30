@@ -149,6 +149,11 @@ type (
 		GroupIds       []string `json:"group_ids"`
 		OrganizationId string   `json:"organization_id"`
 	}
+	Account struct {
+		Id       string `json:"id"`
+		Username string `json:"username"`
+		TeamId   string `json:"team_id,omitempty"`
+	}
 
 	Identifier string
 
@@ -446,6 +451,33 @@ func (l Language) String() string {
      entry point name: %v
            extensions: %v
 `, l.Id, l.Name, l.EntryPointRequired, l.EntryPointName, l.Extensions)
+}
+
+// -- Account implementation
+
+func (a Account) FromJSON(data []byte) (ApiType, error) {
+	err := json.Unmarshal(data, &a)
+	return a, err
+}
+
+func (a Account) InContest() bool {
+	return true
+}
+
+func (a Account) Path() string {
+	return "accounts"
+}
+
+func (a Account) Generate() ApiType {
+	return Account{}
+}
+
+func (a Account) String() string {
+	return fmt.Sprintf(`
+        id: %v
+  username: %v
+   team id: %v
+`, a.Id, a.Username, a.TeamId)
 }
 
 // -- ApiTime implementation

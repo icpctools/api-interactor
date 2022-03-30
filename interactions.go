@@ -47,6 +47,61 @@ func (i inter) Contest() (c Contest, err error) {
 	return i.ContestById(i.contestId)
 }
 
+func (i inter) Accounts() ([]Account, error) {
+	obj, err := i.GetObjects(Account{})
+	if err != nil {
+		return nil, err
+	}
+
+	// obj should be a slice of Account, cast to it to slice of Account
+	ret := make([]Account, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Account)
+		if !ok {
+			return ret, fmt.Errorf("expected account, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) AccountById(accountId string) (a Account, err error) {
+	obj, err := i.GetObject(a, accountId)
+	if err != nil {
+		return a, err
+	}
+
+	vv, ok := obj.(Account)
+	if !ok {
+		return a, fmt.Errorf("expected account, got: %T", obj)
+	}
+
+	a = vv
+	return
+}
+
+func (i inter) Account() (a Account, err error) {
+	objs, err := i.retrieve(Account{}, "contests/"+i.contestId+"/account", true)
+
+	if err != nil {
+		return a, err
+	}
+
+	if len(objs) != 1 {
+		return a, fmt.Errorf("expected 1 object, got: %v", len(objs))
+	}
+
+	vv, ok := objs[0].(Account)
+	if !ok {
+		return a, fmt.Errorf("expected account, got: %T", objs[0])
+	}
+
+	a = vv
+	return
+}
+
 func (i inter) Problems() ([]Problem, error) {
 	obj, err := i.GetObjects(Problem{})
 	if err != nil {
