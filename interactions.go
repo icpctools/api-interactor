@@ -47,6 +47,41 @@ func (i inter) Contest() (c Contest, err error) {
 	return i.ContestById(i.contestId)
 }
 
+func (i inter) Persons() ([]Person, error) {
+	obj, err := i.GetObjects(Person{})
+	if err != nil {
+		return nil, err
+	}
+
+	// obj should be a slice of Person, cast to it to slice of Person
+	ret := make([]Person, len(obj))
+	for k, v := range obj {
+		vv, ok := v.(Person)
+		if !ok {
+			return ret, fmt.Errorf("expected person, got: %T", v)
+		}
+
+		ret[k] = vv
+	}
+
+	return ret, nil
+}
+
+func (i inter) PersonById(personId string) (p Person, err error) {
+	obj, err := i.GetObject(p, personId)
+	if err != nil {
+		return p, err
+	}
+
+	vv, ok := obj.(Person)
+	if !ok {
+		return p, fmt.Errorf("expected person, got: %T", obj)
+	}
+
+	p = vv
+	return
+}
+
 func (i inter) Accounts() ([]Account, error) {
 	obj, err := i.GetObjects(Account{})
 	if err != nil {
