@@ -149,9 +149,12 @@ type (
 		GroupIds       []string `json:"group_ids"`
 		OrganizationId string   `json:"organization_id"`
 	}
+
 	Account struct {
 		Id       string `json:"id"`
 		Username string `json:"username"`
+		Type     string `json:"type,omitempty"`
+		Ip       string `json:"ip,omitempty"`
 		TeamId   string `json:"team_id,omitempty"`
 	}
 
@@ -476,8 +479,10 @@ func (a Account) String() string {
 	return fmt.Sprintf(`
         id: %v
   username: %v
+      type: %v
+        ip: %v
    team id: %v
-`, a.Id, a.Username, a.TeamId)
+`, a.Id, a.Username, a.Type, a.Ip, a.TeamId)
 }
 
 // -- ApiTime implementation
