@@ -20,6 +20,10 @@ type (
 
 		Contest() (Contest, error)
 
+		Accounts() ([]Account, error)
+		AccountById(accountId string) (Account, error)
+		Account() (Account, error)
+
 		Problems() ([]Problem, error)
 		ProblemById(problemId string) (Problem, error)
 
