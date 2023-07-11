@@ -22,39 +22,7 @@ type (
 
 		State() (State, error)
 
-		JudgementTypes() ([]JudgementType, error)
-		JudgementTypeById(judgementTypeId string) (JudgementType, error)
-
-		Languages() ([]Language, error)
-		LanguageById(languageId string) (Language, error)
-
-		Problems() ([]Problem, error)
-		ProblemById(problemId string) (Problem, error)
-
-		Groups() ([]Group, error)
-		GroupById(groupId string) (Group, error)
-
-		Organizations() ([]Organization, error)
-		OrganizationById(organizationId string) (Organization, error)
-
-		Teams() ([]Team, error)
-		TeamById(teamId string) (Team, error)
-
-		Persons() ([]Person, error)
-		PersonById(personId string) (Person, error)
-
-		Accounts() ([]Account, error)
-		AccountById(accountId string) (Account, error)
 		Account() (Account, error)
-
-		Submissions() ([]Submission, error)
-		SubmissionById(submissionId string) (Submission, error)
-
-		Judgements() ([]Judgement, error)
-		JudgementById(judgementId string) (Judgement, error)
-
-		Clarifications() ([]Clarification, error)
-		ClarificationById(clarificationId string) (Clarification, error)
 
 		Scoreboard() (Scoreboard, error)
 

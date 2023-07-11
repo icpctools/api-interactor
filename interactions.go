@@ -47,18 +47,19 @@ func (i inter) Contest() (c Contest, err error) {
 	return i.ContestById(i.contestId)
 }
 
-func (i inter) Persons() ([]Person, error) {
-	obj, err := i.GetObjects(Person{})
+func List[T ApiType](i ContestApi, interactor T) ([]T, error) {
+	obj, err := i.GetObjects(interactor)
+
 	if err != nil {
 		return nil, err
 	}
 
-	// obj should be a slice of Person, cast to it to slice of Person
-	ret := make([]Person, len(obj))
+	// obj should be a slice of T, cast to it to slice of T
+	ret := make([]T, len(obj))
 	for k, v := range obj {
-		vv, ok := v.(Person)
+		vv, ok := v.(T)
 		if !ok {
-			return ret, fmt.Errorf("expected person, got: %T", v)
+			return ret, fmt.Errorf("expected %T, got: %T", interactor, v)
 		}
 
 		ret[k] = vv
@@ -67,53 +68,18 @@ func (i inter) Persons() ([]Person, error) {
 	return ret, nil
 }
 
-func (i inter) PersonById(personId string) (p Person, err error) {
-	obj, err := i.GetObject(p, personId)
+func GetById[T ApiType](i ContestApi, id string) (t T, err error) {
+	obj, err := i.GetObject(t, id)
 	if err != nil {
-		return p, err
+		return t, err
 	}
 
-	vv, ok := obj.(Person)
+	vv, ok := obj.(T)
 	if !ok {
-		return p, fmt.Errorf("expected person, got: %T", obj)
+		return t, fmt.Errorf("expected %T, got: %T", t, obj)
 	}
 
-	p = vv
-	return
-}
-
-func (i inter) Accounts() ([]Account, error) {
-	obj, err := i.GetObjects(Account{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Account, cast to it to slice of Account
-	ret := make([]Account, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Account)
-		if !ok {
-			return ret, fmt.Errorf("expected account, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) AccountById(accountId string) (a Account, err error) {
-	obj, err := i.GetObject(a, accountId)
-	if err != nil {
-		return a, err
-	}
-
-	vv, ok := obj.(Account)
-	if !ok {
-		return a, fmt.Errorf("expected account, got: %T", obj)
-	}
-
-	a = vv
+	t = vv
 	return
 }
 
@@ -134,321 +100,6 @@ func (i inter) Account() (a Account, err error) {
 	}
 
 	a = vv
-	return
-}
-
-func (i inter) Problems() ([]Problem, error) {
-	obj, err := i.GetObjects(Problem{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Problem, cast to it to slice of Problem
-	ret := make([]Problem, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Problem)
-		if !ok {
-			return ret, fmt.Errorf("expected problem, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) ProblemById(problemId string) (p Problem, err error) {
-	obj, err := i.GetObject(p, problemId)
-	if err != nil {
-		return p, err
-	}
-
-	vv, ok := obj.(Problem)
-	if !ok {
-		return p, fmt.Errorf("expected problem, got: %T", obj)
-	}
-
-	p = vv
-	return
-}
-
-func (i inter) Submissions() ([]Submission, error) {
-	obj, err := i.GetObjects(Submission{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Submission, cast to it to slice of Submission
-	ret := make([]Submission, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Submission)
-		if !ok {
-			return ret, fmt.Errorf("expected submission, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) SubmissionById(submissionId string) (s Submission, err error) {
-	obj, err := i.GetObject(s, submissionId)
-	if err != nil {
-		return s, err
-	}
-
-	vv, ok := obj.(Submission)
-	if !ok {
-		return s, fmt.Errorf("expected submission, got: %T", obj)
-	}
-
-	s = vv
-	return
-}
-
-func (i inter) Languages() ([]Language, error) {
-	obj, err := i.GetObjects(Language{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Language, cast to it to slice of Language
-	ret := make([]Language, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Language)
-		if !ok {
-			return ret, fmt.Errorf("expected language, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) LanguageById(languageId string) (l Language, err error) {
-	obj, err := i.GetObject(l, languageId)
-	if err != nil {
-		return l, err
-	}
-
-	vv, ok := obj.(Language)
-	if !ok {
-		return l, fmt.Errorf("expected language, got: %T", obj)
-	}
-
-	l = vv
-	return
-}
-
-func (i inter) JudgementTypes() ([]JudgementType, error) {
-	obj, err := i.GetObjects(JudgementType{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of JudgementType, cast to it to slice of JudgementType
-	ret := make([]JudgementType, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(JudgementType)
-		if !ok {
-			return ret, fmt.Errorf("expected judgement type, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) JudgementTypeById(judgementTypeId string) (jt JudgementType, err error) {
-	obj, err := i.GetObject(jt, judgementTypeId)
-	if err != nil {
-		return jt, err
-	}
-
-	vv, ok := obj.(JudgementType)
-	if !ok {
-		return jt, fmt.Errorf("judgement type, got: %T", obj)
-	}
-
-	jt = vv
-	return
-}
-
-func (i inter) Judgements() ([]Judgement, error) {
-	obj, err := i.GetObjects(Judgement{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Judgement, cast to it to slice of Judgement
-	ret := make([]Judgement, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Judgement)
-		if !ok {
-			return ret, fmt.Errorf("expected judgement, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) JudgementById(judgementId string) (j Judgement, err error) {
-	obj, err := i.GetObject(j, judgementId)
-	if err != nil {
-		return j, err
-	}
-
-	vv, ok := obj.(Judgement)
-	if !ok {
-		return j, fmt.Errorf("expected judgement, got: %T", obj)
-	}
-
-	j = vv
-	return
-}
-
-func (i inter) Clarifications() ([]Clarification, error) {
-	obj, err := i.GetObjects(Clarification{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Clarification, cast to it to slice of Clarification
-	ret := make([]Clarification, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Clarification)
-		if !ok {
-			return ret, fmt.Errorf("expected clarification, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) ClarificationById(clarificationId string) (c Clarification, err error) {
-	obj, err := i.GetObject(c, clarificationId)
-	if err != nil {
-		return c, err
-	}
-
-	vv, ok := obj.(Clarification)
-	if !ok {
-		return c, fmt.Errorf("expected clarification, got: %T", obj)
-	}
-
-	c = vv
-	return
-}
-
-func (i inter) Groups() ([]Group, error) {
-	obj, err := i.GetObjects(Group{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Group, cast to it to slice of Group
-	ret := make([]Group, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Group)
-		if !ok {
-			return ret, fmt.Errorf("expected group, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) GroupById(groupId string) (g Group, err error) {
-	obj, err := i.GetObject(g, groupId)
-	if err != nil {
-		return g, err
-	}
-
-	vv, ok := obj.(Group)
-	if !ok {
-		return g, fmt.Errorf("expected group, got: %T", obj)
-	}
-
-	g = vv
-	return
-}
-
-func (i inter) Organizations() ([]Organization, error) {
-	obj, err := i.GetObjects(Organization{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Organization, cast to it to slice of Organization
-	ret := make([]Organization, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Organization)
-		if !ok {
-			return ret, fmt.Errorf("expected organization, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) OrganizationById(organizationId string) (o Organization, err error) {
-	obj, err := i.GetObject(o, organizationId)
-	if err != nil {
-		return o, err
-	}
-
-	vv, ok := obj.(Organization)
-	if !ok {
-		return o, fmt.Errorf("expected organization, got: %T", obj)
-	}
-
-	o = vv
-	return
-}
-
-func (i inter) Teams() ([]Team, error) {
-	obj, err := i.GetObjects(Team{})
-	if err != nil {
-		return nil, err
-	}
-
-	// obj should be a slice of Team, cast to it to slice of Team
-	ret := make([]Team, len(obj))
-	for k, v := range obj {
-		vv, ok := v.(Team)
-		if !ok {
-			return ret, fmt.Errorf("expected team, got: %T", v)
-		}
-
-		ret[k] = vv
-	}
-
-	return ret, nil
-}
-
-func (i inter) TeamById(teamId string) (t Team, err error) {
-	obj, err := i.GetObject(t, teamId)
-	if err != nil {
-		return t, err
-	}
-
-	vv, ok := obj.(Team)
-	if !ok {
-		return t, fmt.Errorf("expected team, got: %T", obj)
-	}
-
-	t = vv
 	return
 }
 

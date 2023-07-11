@@ -132,7 +132,7 @@ func TestProblemRetrieval(t *testing.T) {
 
 	var problemId string
 	t.Run("all-problems", func(t *testing.T) {
-		problems, err := api.Problems()
+		problems, err := List(api, Problem{})
 		assert.Nil(t, err)
 		assert.NotNil(t, problems)
 
@@ -149,7 +149,7 @@ func TestProblemRetrieval(t *testing.T) {
 			t.Skip("no problems could be found, retrieving single problem cannot be tested")
 		}
 
-		problem, err := api.ProblemById(problemId)
+		problem, err := GetById[Problem](api, problemId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, problemId, problem.Id)
 	})
@@ -160,7 +160,7 @@ func TestJudgementTypeRetrieval(t *testing.T) {
 
 	var jtId string
 	t.Run("all-judgement-types", func(t *testing.T) {
-		judgementTypes, err := api.JudgementTypes()
+		judgementTypes, err := List(api, JudgementType{})
 		assert.Nil(t, err)
 		assert.NotNil(t, judgementTypes)
 
@@ -177,7 +177,7 @@ func TestJudgementTypeRetrieval(t *testing.T) {
 			t.Skip("no judgement types could be found, retrieving single judgement type cannot be tested")
 		}
 
-		jt, err := api.JudgementTypeById(jtId)
+		jt, err := GetById[JudgementType](api, jtId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, jtId, jt.Id)
 	})
@@ -188,7 +188,7 @@ func TestSubmissionRetrieval(t *testing.T) {
 
 	var submissionId string
 	t.Run("all-submissions", func(t *testing.T) {
-		submissions, err := api.Submissions()
+		submissions, err := List(api, Submission{})
 		assert.Nil(t, err)
 		assert.NotNil(t, submissions)
 
@@ -208,7 +208,7 @@ func TestSubmissionRetrieval(t *testing.T) {
 
 		t.Log(submissionId, testUser, testPass)
 
-		submission, err := api.SubmissionById(submissionId)
+		submission, err := GetById[Submission](api, submissionId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, submissionId, submission.Id)
 	})
@@ -219,7 +219,7 @@ func TestJudgementRetrieval(t *testing.T) {
 
 	var jId string
 	t.Run("all-judgements", func(t *testing.T) {
-		judgements, err := api.Judgements()
+		judgements, err := List(api, Judgement{})
 		assert.Nil(t, err)
 		assert.NotNil(t, judgements)
 
@@ -236,7 +236,7 @@ func TestJudgementRetrieval(t *testing.T) {
 			t.Skip("no judgements could be found, retrieving single judgement cannot be tested")
 		}
 
-		j, err := api.JudgementById(jId)
+		j, err := GetById[Judgement](api, jId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, jId, j.Id)
 	})
@@ -247,7 +247,7 @@ func TestGroupRetrieval(t *testing.T) {
 
 	var groupId string
 	t.Run("all-groups", func(t *testing.T) {
-		groups, err := api.Groups()
+		groups, err := List(api, Group{})
 		assert.Nil(t, err)
 		assert.NotNil(t, groups)
 
@@ -264,7 +264,7 @@ func TestGroupRetrieval(t *testing.T) {
 			t.Skip("no groups could be found, retrieving single group cannot be tested")
 		}
 
-		group, err := api.GroupById(groupId)
+		group, err := GetById[Group](api, groupId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, groupId, group.Id)
 	})
@@ -275,7 +275,7 @@ func TestOrganizationRetrieval(t *testing.T) {
 
 	var organizationId string
 	t.Run("all-organizations", func(t *testing.T) {
-		organizations, err := api.Organizations()
+		organizations, err := List(api, Organization{})
 		assert.Nil(t, err)
 		assert.NotNil(t, organizations)
 
@@ -292,7 +292,7 @@ func TestOrganizationRetrieval(t *testing.T) {
 			t.Skip("no organizations could be found, retrieving single organization cannot be tested")
 		}
 
-		organization, err := api.OrganizationById(organizationId)
+		organization, err := GetById[Organization](api, organizationId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, organizationId, organization.Id)
 	})
@@ -303,7 +303,7 @@ func TestTeamRetrieval(t *testing.T) {
 
 	var teamId string
 	t.Run("all-teams", func(t *testing.T) {
-		teams, err := api.Teams()
+		teams, err := List(api, Team{})
 		assert.Nil(t, err)
 		assert.NotNil(t, teams)
 
@@ -320,7 +320,7 @@ func TestTeamRetrieval(t *testing.T) {
 			t.Skip("no teams could be found, retrieving single team cannot be tested")
 		}
 
-		team, err := api.TeamById(teamId)
+		team, err := GetById[Team](api, teamId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, teamId, team.Id)
 	})
@@ -349,7 +349,7 @@ func TestLanguageRetrieval(t *testing.T) {
 
 	var languageId string
 	t.Run("all-languages", func(t *testing.T) {
-		languages, err := api.Languages()
+		languages, err := List(api, Language{})
 		assert.Nil(t, err)
 		assert.NotNil(t, languages)
 
@@ -371,7 +371,7 @@ func TestLanguageRetrieval(t *testing.T) {
 
 		t.Log(languageId, testUser, testPass)
 
-		language, err := api.LanguageById(languageId)
+		language, err := GetById[Language](api, languageId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, languageId, language.Id)
 	})
@@ -382,7 +382,7 @@ func TestClarificationRetrieval(t *testing.T) {
 
 	var clarificationId string
 	t.Run("all-clarifications", func(t *testing.T) {
-		clarifications, err := api.Clarifications()
+		clarifications, err := List(api, Clarification{})
 		assert.Nil(t, err)
 		assert.NotNil(t, clarifications)
 
@@ -399,7 +399,7 @@ func TestClarificationRetrieval(t *testing.T) {
 			t.Skip("no clarifications could be found, retrieving single clarification cannot be tested")
 		}
 
-		clarification, err := api.ClarificationById(clarificationId)
+		clarification, err := GetById[Clarification](api, clarificationId)
 		assert.Nil(t, err)
 		assert.EqualValues(t, clarificationId, clarification.Id)
 	})
@@ -551,7 +551,7 @@ func TestInvalidCert(t *testing.T) {
 		api := interactor(t)
 		api.(*inter).baseUrl = "https://localhost:8888/"
 
-		problems, err := api.Problems()
+		problems, err := List(api, Problem{})
 		assert.Nil(t, problems)
 		assert.NotNil(t, err)
 
